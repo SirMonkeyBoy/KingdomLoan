@@ -1,0 +1,8 @@
+name: Loan
+version: '${project.version}'
+main: me.sirmonkeyboy.loan.Loan
+api-version: '1.20'
+depend: [vault]
+authors: [SirMonkeyBoy]
+description: Loan Plugin for minecraft
+website: https://github.com/SirMonkeyBoy
