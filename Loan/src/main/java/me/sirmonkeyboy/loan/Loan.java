@@ -1,8 +1,13 @@
 package me.sirmonkeyboy.loan;
 
+import me.sirmonkeyboy.loan.Commands.LoanCommand;
+
 import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 public final class Loan extends JavaPlugin {
 
@@ -16,7 +21,7 @@ public final class Loan extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
+        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
     }
 
     private boolean setupEconomy() {
