@@ -4,6 +4,7 @@ import me.sirmonkeyboy.loan.Commands.LoanCommand;
 
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,6 +23,7 @@ public final class Loan extends JavaPlugin {
             return;
         }
         Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
+        Bukkit.getLogger().info("Loan Plugin has started");
     }
 
     private boolean setupEconomy() {
@@ -45,5 +47,6 @@ public final class Loan extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        Bukkit.getLogger().info("Loan Plugin has stopped");
     }
 }
