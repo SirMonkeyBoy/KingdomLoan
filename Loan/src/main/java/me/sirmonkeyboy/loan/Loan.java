@@ -18,12 +18,12 @@ public final class Loan extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         if (!setupEconomy() ) {
-            System.out.println("Disabled due to no Vault dependency found!");
+            getLogger().info("Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
-        Bukkit.getLogger().info("Loan Plugin has started");
+        getLogger().info("Loan Plugin has started");
     }
 
     private boolean setupEconomy() {
@@ -47,6 +47,6 @@ public final class Loan extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        Bukkit.getLogger().info("Loan Plugin has stopped");
+        getLogger().info("Loan Plugin has stopped");
     }
 }
