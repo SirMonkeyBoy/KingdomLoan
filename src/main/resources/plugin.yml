@@ -2,4 +2,11 @@ name: Loan
 version: '1.0-SNAPSHOT'
 main: com.github.sirmonkeyboy.loan.Loan
 api-version: '1.21'
+depend: [Vault]
 authors: [SirMonkeyBoy]
+description: Loan Plugin for minecraft
+website: https://github.com/SirMonkeyBoy
+commands:
+  Loan:
+    description: Loan command
+    usage: /<command>
