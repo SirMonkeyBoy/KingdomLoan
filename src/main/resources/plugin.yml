@@ -1,0 +1,5 @@
+name: Loan
+version: '1.0-SNAPSHOT'
+main: com.github.sirmonkeyboy.loan.Loan
+api-version: '1.21'
+authors: [SirMonkeyBoy]
