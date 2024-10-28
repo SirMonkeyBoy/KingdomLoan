@@ -37,7 +37,13 @@ public final class Loan extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
+
+        try {
+            data.createTable();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
 
         getLogger().info("Loan Plugin has started");

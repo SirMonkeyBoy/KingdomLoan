@@ -4,6 +4,7 @@ import com.github.sirmonkeyboy.loan.Loan;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class MariaDB {
@@ -50,4 +51,33 @@ public class MariaDB {
     public Connection getConnection() {
         return connection;
     }
+
+    public void createTable() throws SQLException {
+        // Connect to the database
+        Connection conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
+
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS Loan (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,\n" +
+                    "uuidOfLoaner VARCHAR(255),\n" +
+                    "nameOfLoaner VARCHAR(255),\n" +
+                    "uuidOfLoaned VARCHAR(255),\n" +
+                    "nameOfLoaned VARCHAR(255),\n" +
+                    "amountLoaned DOUBLE,\n" +
+                    "amountPaid DOUBLE,\n" +
+                    "amountPaidOut DOUBLE,\n" +
+                    "PRIMARY KEY(id))");
+            pstmt.executeUpdate();
+
+            PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS Loan_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
+            pstmt2.executeUpdate();
+        } catch (SQLException e) {
+            // Roll back the transaction if an exception occurs
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.close();
+        }
+    }
+
 }

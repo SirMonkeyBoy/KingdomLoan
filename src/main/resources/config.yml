@@ -3,6 +3,6 @@
 mariaDB:
   host: localhost
   port: 3306
-  database: bank
+  database: loan
   username: user
   password: password
