@@ -60,6 +60,8 @@ public final class Loan extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        data.disconnect();
+        if (data.isConnected()) {
+            data.disconnect();
+        }
     }
 }
