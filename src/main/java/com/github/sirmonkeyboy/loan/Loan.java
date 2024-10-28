@@ -1,11 +1,13 @@
 package com.github.sirmonkeyboy.loan;
 
+import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
 import com.github.sirmonkeyboy.loan.Utill.MariaDB;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 public final class Loan extends JavaPlugin {
 
@@ -35,6 +37,8 @@ public final class Loan extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        
+        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
 
         getLogger().info("Loan Plugin has started");
     }
