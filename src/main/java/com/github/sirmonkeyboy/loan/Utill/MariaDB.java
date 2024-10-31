@@ -64,6 +64,7 @@ public class MariaDB {
                     "uuidOfLoaned VARCHAR(255),\n" +
                     "nameOfLoaned VARCHAR(255),\n" +
                     "amountLoaned DOUBLE,\n" +
+                    "amountToPayBack\n" +
                     "amountPaid DOUBLE,\n" +
                     "amountPaidOut DOUBLE,\n" +
                     "PRIMARY KEY(id))");
