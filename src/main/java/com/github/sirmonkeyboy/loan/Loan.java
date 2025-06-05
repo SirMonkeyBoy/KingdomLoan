@@ -3,7 +3,10 @@ package com.github.sirmonkeyboy.loan;
 import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
 import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
 import com.github.sirmonkeyboy.loan.Utils.MariaDB;
+import com.github.sirmonkeyboy.loan.Utils.Utils;
+
 import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,24 +21,23 @@ public final class Loan extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
 
         this.saveDefaultConfig();
 
         ConfigManager configManager = new ConfigManager(this);
-        this.data = new MariaDB(this);
+        this.data = new MariaDB(configManager);
 
         if (!setupEconomy() ) {
-            getLogger().info("Disabled due to no Vault dependency found!");
+            Utils.getErrorLogger("Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
         try {
             data.connect();
-        } catch (ClassNotFoundException | SQLException e) {
-            getLogger().info("Database not connected");
-            getLogger().info("Disabled due to no Database found!");
+        } catch (Exception e) {
+            Utils.getErrorLogger("Database not connected");
+            Utils.getErrorLogger("Disabled due to no Database found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -43,12 +45,14 @@ public final class Loan extends JavaPlugin {
         try {
             data.createTable();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Utils.getErrorLogger("Disable Loan due to error in Database tables");
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
         }
 
         Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
 
-        getLogger().info("Loan Plugin has started");
+        getLogger().info("Loan has started");
     }
 
     private boolean setupEconomy() {
@@ -71,9 +75,12 @@ public final class Loan extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+
         if (data.isConnected()) {
             data.disconnect();
+            getLogger().info("Disconnected successfully from Database");
         }
+
+        getLogger().info("Loan has stopped");
     }
 }
