@@ -1,6 +1,7 @@
 package com.github.sirmonkeyboy.loan;
 
 import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
+import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
 import com.github.sirmonkeyboy.loan.Utils.MariaDB;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -11,7 +12,7 @@ import java.util.Objects;
 
 public final class Loan extends JavaPlugin {
 
-    public MariaDB data;
+    private MariaDB data;
 
     private static Economy econ = null;
 
@@ -21,13 +22,14 @@ public final class Loan extends JavaPlugin {
 
         this.saveDefaultConfig();
 
+        ConfigManager configManager = new ConfigManager(this);
+        this.data = new MariaDB(this);
+
         if (!setupEconomy() ) {
             getLogger().info("Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
-        this.data = new MariaDB(this);
 
         try {
             data.connect();
