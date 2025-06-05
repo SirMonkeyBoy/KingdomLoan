@@ -2,6 +2,7 @@ name: Loan
 version: '${project.version}'
 main: com.github.sirmonkeyboy.loan.Loan
 api-version: '1.21'
+prefix: Laon
 depend: [Vault]
 authors: [SirMonkeyBoy]
 description: Loan Plugin for minecraft
