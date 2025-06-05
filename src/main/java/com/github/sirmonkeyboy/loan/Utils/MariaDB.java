@@ -1,4 +1,4 @@
-package com.github.sirmonkeyboy.loan.Utill;
+package com.github.sirmonkeyboy.loan.Utils;
 
 import com.github.sirmonkeyboy.loan.Loan;
 

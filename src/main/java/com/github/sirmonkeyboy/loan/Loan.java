@@ -1,7 +1,7 @@
 package com.github.sirmonkeyboy.loan;
 
 import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
-import com.github.sirmonkeyboy.loan.Utill.MariaDB;
+import com.github.sirmonkeyboy.loan.Utils.MariaDB;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
