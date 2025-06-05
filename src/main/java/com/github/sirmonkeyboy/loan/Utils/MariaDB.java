@@ -1,84 +1,74 @@
 package com.github.sirmonkeyboy.loan.Utils;
 
-import com.github.sirmonkeyboy.loan.Loan;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class MariaDB {
-    private final Loan plugin;
 
-    public MariaDB(Loan plugin) {
-        this.plugin = plugin;
-        host = plugin.getConfig().getString("mariaDB.host");
-        port = plugin.getConfig().getString("mariaDB.port");
-        database = plugin.getConfig().getString("mariaDB.database");
-        username = plugin.getConfig().getString("mariaDB.username");
-        password = plugin.getConfig().getString("mariaDB.password");
+    private final ConfigManager configManager;
+
+    private HikariDataSource dataSource;
+
+    public MariaDB(ConfigManager configManager) {
+        this.configManager = configManager;
     }
 
-    private final String host;
-    private final String port;
-    private final String database;
-    private final String username;
-    private final String password;
 
-    private Connection connection;
+    public void connect() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:mysql://" + configManager.getHost() + ":" + configManager.getPort() + "/" + configManager.getDatabase());
+        config.setUsername(configManager.getUsername());
+        config.setPassword(configManager.getPassword());
+        config.setMaximumPoolSize(configManager.getSetMaximumPoolSize());
+        config.setMinimumIdle(configManager.getSetMinimumIdle());
+        config.setIdleTimeout(30000);
+        config.setConnectionTimeout(30000);
+        config.setLeakDetectionThreshold(10000);
 
+        dataSource = new HikariDataSource(config);
+    }
+
+    // Checks if the database is connected
     public boolean isConnected() {
-        return (connection != null);
+        return (dataSource != null && !dataSource.isClosed());
     }
 
-    public void connect() throws ClassNotFoundException, SQLException {
-        if (!isConnected()) {
-            connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
-        }
-    }
-
+    // Disconnects for the database if connected
     public void disconnect() {
-        if (isConnected()) {
-            try {
-                connection.close();
-            }catch (SQLException e){
-                //noinspection CallToPrintStackTrace
-                e.printStackTrace();
-            }
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    //Gets database connection
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
     public void createTable() throws SQLException {
-        // Connect to the database
-        Connection conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
+        try (Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement("""
+                        CREATE TABLE IF NOT EXISTS Loan (
+                        loanId INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+                        uuidOfLoaner VARCHAR(255),
+                        nameOfLoaner VARCHAR(255),
+                        uuidOfLoaned VARCHAR(255),
+                        nameOfLoaned VARCHAR(255),
+                        amountLoaned DOUBLE,
+                        amountToPayBack DOUBLE,
+                        amountPaid DOUBLE,
+                        amountPaidOut DOUBLE,
+                        PRIMARY KEY(id)
+                        )""");
+                pstmt.executeUpdate();
 
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS Loan (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,\n" +
-                    "uuidOfLoaner VARCHAR(255),\n" +
-                    "nameOfLoaner VARCHAR(255),\n" +
-                    "uuidOfLoaned VARCHAR(255),\n" +
-                    "nameOfLoaned VARCHAR(255),\n" +
-                    "amountLoaned DOUBLE,\n" +
-                    "amountToPayBack\n" +
-                    "amountPaid DOUBLE,\n" +
-                    "amountPaidOut DOUBLE,\n" +
-                    "PRIMARY KEY(id))");
-            pstmt.executeUpdate();
+                PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS Loan_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
+                pstmt2.executeUpdate();
 
-            PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS Loan_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
-            pstmt2.executeUpdate();
-        } catch (SQLException e) {
-            // Roll back the transaction if an exception occurs
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.close();
         }
     }
-
 }
