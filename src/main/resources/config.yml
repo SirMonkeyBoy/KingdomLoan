@@ -1,0 +1,8 @@
+
+#MariaDB is needed for the plugin to work
+mariaDB:
+  host: localhost
+  port: 3306
+  database: loan
+  username: user
+  password: password

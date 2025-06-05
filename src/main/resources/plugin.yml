@@ -1,12 +1,12 @@
 name: Loan
 version: '${project.version}'
-main: me.sirmonkeyboy.loan.Loan
-api-version: '1.20'
+main: com.github.sirmonkeyboy.loan.Loan
+api-version: '1.21'
 depend: [Vault]
 authors: [SirMonkeyBoy]
 description: Loan Plugin for minecraft
 website: https://github.com/SirMonkeyBoy
 commands:
   Loan:
-    description: Helpful server setup commands
+    description: Loan command
     usage: /<command>
