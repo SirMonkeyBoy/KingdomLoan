@@ -62,13 +62,30 @@ public class MariaDB {
                         amountToPayBack DOUBLE,
                         amountPaid DOUBLE,
                         amountPaidOut DOUBLE,
-                        PRIMARY KEY(loanId)
+                        PRIMARY KEY(loanId, uuidOfLoaned)
                         )""");
                 pstmt.executeUpdate();
 
                 PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS Loan_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
                 pstmt2.executeUpdate();
 
+            PreparedStatement pstmt3 = conn.prepareStatement("""
+                        CREATE TABLE IF NOT EXISTS LoanHistory (
+                        loanHistoryId INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+                        uuidOfLoaner VARCHAR(255),
+                        nameOfLoaner VARCHAR(255),
+                        uuidOfLoaned VARCHAR(255),
+                        nameOfLoaned VARCHAR(255),
+                        amountLoaned DOUBLE,
+                        amountToPayBack DOUBLE,
+                        loanStartDate TIMESTAMP,
+                        loanEndDate TIMESTAMP,
+                        PRIMARY KEY(loanHistoryId)
+                        )""");
+            pstmt3.executeUpdate();
+
+            PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS LoanHistory_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
+            pstmt4.executeUpdate();
         }
     }
 }
