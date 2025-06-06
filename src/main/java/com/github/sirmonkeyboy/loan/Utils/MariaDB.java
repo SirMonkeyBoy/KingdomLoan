@@ -99,9 +99,7 @@ public class MariaDB {
         UUID uuid = p.getUniqueId();
         String name = p.getName();
 
-        boolean success = false;
-
-        try (Connection conn = getConnection();) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement pstmt = conn.prepareStatement("SELECT NAME FROM Loan WHERE UUID = ?")) {
@@ -127,7 +125,7 @@ public class MariaDB {
                     }
                 }
 
-                success = true;
+                conn.commit();
             }catch (SQLException e) {
                 try {
                     conn.rollback();
@@ -138,7 +136,6 @@ public class MariaDB {
                 }
                 throw e;
             } finally {
-                if (success) conn.commit();
                 conn.setAutoCommit(true);
             }
         }
