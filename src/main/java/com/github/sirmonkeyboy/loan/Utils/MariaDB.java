@@ -99,10 +99,9 @@ public class MariaDB {
         UUID uuid = p.getUniqueId();
         String name = p.getName();
 
-        Connection conn = null;
+        boolean success = false;
 
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection();) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement pstmt = conn.prepareStatement("SELECT NAME FROM Loan WHERE UUID = ?")) {
@@ -127,10 +126,9 @@ public class MariaDB {
                         }
                     }
                 }
-            }
-            conn.commit();
-        }catch (SQLException e) {
-            if (conn != null) {
+
+                success = true;
+            }catch (SQLException e) {
                 try {
                     conn.rollback();
                 } catch (SQLException rollbackEx) {
@@ -138,16 +136,10 @@ public class MariaDB {
                     Utils.getErrorLogger("Error updating player name in Loan database tables: " + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException ex) {
-                    Utils.getErrorLogger(ex.getMessage());
-                }
+                throw e;
+            } finally {
+                if (success) conn.commit();
+                conn.setAutoCommit(true);
             }
         }
     }
