@@ -21,6 +21,10 @@ public class ConfigManager {
     private String password;
     private int setMaximumPoolSize;
     private int setMinimumIdle;
+    private int requestTimeout;
+    private int cooldown;
+    private String cooldownMessage;
+    private String invalidAmountMessage;
     // This is set here so it can't get removed in config
     @SuppressWarnings("FieldCanBeLocal")
     private final String missingMessage = "Contact Server Admin missing message in config";
@@ -50,11 +54,15 @@ public class ConfigManager {
         password = plugin.getConfig().getString("MariaDB.password", "password");
         setMaximumPoolSize = plugin.getConfig().getInt("MariaDB.Set-Maximum-Pool-Size", 15);
         setMinimumIdle = plugin.getConfig().getInt("MariaDB.Set-Minimum-Idle", 2);
+        requestTimeout = plugin.getConfig().getInt("Loan-Request.Timeout", 120);
+        cooldown = plugin.getConfig().getInt("Cooldown.Cooldown", 20);
+        cooldownMessage = plugin.getConfig().getString("Cooldown.Cooldown-Message", "You must wait %Seconds% seconds before using /loan again.");
+        invalidAmountMessage = plugin.getConfig().getString("Invalid-Amount", "Invalid amount. Please enter a number greater than zero.");
     }
 
     /**
-     * I know this is not needed, but I would like to keep the validation messages
-     * And ik it's not clean, but it does it's job.
+     * I know this is not needed, but I would like to keep the validation messages.
+     * This is only for the Database info as everything else can be the default.
      */
     @SuppressWarnings("DataFlowIssue")
     public boolean validate() {
@@ -102,5 +110,25 @@ public class ConfigManager {
 
     public int getSetMinimumIdle() {
         return setMinimumIdle;
+    }
+
+    public int getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    public int getTimeoutTicks() {
+        return requestTimeout * 20;
+    }
+
+    public int getCooldown() {
+        return cooldown;
+    }
+
+    public String getCooldownMessage() {
+        return cooldownMessage;
+    }
+
+    public String getInvalidAmountMessage() {
+        return invalidAmountMessage;
     }
 }
