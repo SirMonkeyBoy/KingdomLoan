@@ -1,14 +1,17 @@
 package com.github.sirmonkeyboy.loan.Commands;
 
 import com.github.sirmonkeyboy.loan.Loan;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-
 import org.bukkit.entity.Player;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,15 +60,19 @@ public class LoanCommand implements TabExecutor {
                         p.sendMessage(Component.text("You Don't have permission to use /loan create").color(NamedTextColor.RED));
                         return true;
                     }
+                    p.sendMessage("test");
                     return true;
 
                 case "accept":
+                    p.sendMessage("test");
                     return true;
 
                 case "pay":
+                    p.sendMessage("test");
                     return true;
 
                 case "list":
+                    p.sendMessage("test");
                     return true;
 
             }
@@ -75,6 +82,44 @@ public class LoanCommand implements TabExecutor {
 
     @Override
     public @Nullable List<String> onTabComplete (@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args){
+        if (args.length == 1) {
+            return List.of("help", "create", "accept", "pay", "list");
+        }
+
+        if (args[0].equalsIgnoreCase("create")) {
+            if (args.length == 2) {
+                return plugin.getServer().getOnlinePlayers().stream()
+                        .map(Player::getName)
+                        .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .toList();
+            }
+
+            if (args.length == 3) {
+                return List.of("Amount");
+            }
+
+            if (args.length == 4) {
+                return List.of("PayBackAmount");
+            }
+            return List.of();
+        }
+
+        if (args[0].equalsIgnoreCase("accept")) {
+            if (args.length == 2) {
+                return plugin.getServer().getOnlinePlayers().stream()
+                        .map(Player::getName)
+                        .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .toList();
+            }
+            return List.of();
+        }
+
+        if (args[0].equalsIgnoreCase("pay")) {
+            if (args.length == 2) {
+                return List.of("Amount");
+            }
+            return List.of();
+        }
         return List.of();
     }
 }
