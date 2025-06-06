@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class LoanRequestManager {
+public class LoanManager {
 
     private final Loan plugin;
 
@@ -24,7 +24,7 @@ public class LoanRequestManager {
 
     private final HashMap<UUID, BukkitTask> requestTimeout = new HashMap<>();
 
-    public LoanRequestManager(Loan plugin, ConfigManager configManager, CooldownManager cooldownManager) {
+    public LoanManager(Loan plugin, ConfigManager configManager, CooldownManager cooldownManager) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.cooldownManager = cooldownManager;

@@ -1,7 +1,7 @@
 package com.github.sirmonkeyboy.loan.Commands;
 
 import com.github.sirmonkeyboy.loan.Loan;
-import com.github.sirmonkeyboy.loan.Utils.LoanRequestManager;
+import com.github.sirmonkeyboy.loan.Utils.LoanManager;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,11 +22,11 @@ public class LoanCommand implements TabExecutor {
 
     private final Loan plugin;
 
-    private final LoanRequestManager loanRequestManager;
+    private final LoanManager loanManager;
 
-    public LoanCommand(Loan plugin, LoanRequestManager loanRequestManager) {
+    public LoanCommand(Loan plugin, LoanManager loanManager) {
         this.plugin = plugin;
-        this.loanRequestManager = loanRequestManager;
+        this.loanManager = loanManager;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class LoanCommand implements TabExecutor {
                         p.sendMessage(Component.text("You Don't have permission to use /loan create").color(NamedTextColor.RED));
                         return true;
                     }
-                    loanRequestManager.loanRequest(p, args);
+                    loanManager.loanRequest(p, args);
                     return true;
 
                 case "accept":

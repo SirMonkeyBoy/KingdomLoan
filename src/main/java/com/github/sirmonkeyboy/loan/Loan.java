@@ -26,7 +26,7 @@ public final class Loan extends JavaPlugin {
         ConfigManager configManager = new ConfigManager(this);
         CooldownManager cooldownManager = new CooldownManager(configManager.getCooldown());
         this.data = new MariaDB(configManager);
-        LoanRequestManager loanRequestManager = new LoanRequestManager(this, configManager, cooldownManager);
+        LoanManager loanManager = new LoanManager(this, configManager, cooldownManager);
 
         if (!setupEconomy() ) {
             Utils.getErrorLogger("Disabled due to no Vault dependency found!");
@@ -51,7 +51,7 @@ public final class Loan extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this, loanRequestManager));
+        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this, loanManager));
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(data), this);
 
