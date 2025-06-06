@@ -2,9 +2,7 @@ package com.github.sirmonkeyboy.loan;
 
 import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
 import com.github.sirmonkeyboy.loan.Listeners.PlayerJoinListener;
-import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
-import com.github.sirmonkeyboy.loan.Utils.MariaDB;
-import com.github.sirmonkeyboy.loan.Utils.Utils;
+import com.github.sirmonkeyboy.loan.Utils.*;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -26,6 +24,7 @@ public final class Loan extends JavaPlugin {
         this.saveDefaultConfig();
 
         ConfigManager configManager = new ConfigManager(this);
+        CooldownManager cooldownManager = new CooldownManager(configManager.getCooldown());
         this.data = new MariaDB(configManager);
 
         if (!setupEconomy() ) {
