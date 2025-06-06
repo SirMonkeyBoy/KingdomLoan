@@ -1,6 +1,7 @@
 package com.github.sirmonkeyboy.loan;
 
 import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
+import com.github.sirmonkeyboy.loan.Listeners.PlayerJoinListener;
 import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
 import com.github.sirmonkeyboy.loan.Utils.MariaDB;
 import com.github.sirmonkeyboy.loan.Utils.Utils;
@@ -51,6 +52,8 @@ public final class Loan extends JavaPlugin {
         }
 
         Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this));
+
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(data), this);
 
         getLogger().info("Loan has started");
     }
