@@ -75,6 +75,9 @@ public class LoanCommand implements TabExecutor {
                     p.sendMessage("test");
                     return true;
 
+                case "history":
+                    p.sendMessage("test");
+                    return true;
             }
         }
         return false;
@@ -101,7 +104,6 @@ public class LoanCommand implements TabExecutor {
             if (args.length == 4) {
                 return List.of("PayBackAmount");
             }
-            return List.of();
         }
 
         if (args[0].equalsIgnoreCase("accept")) {
@@ -111,14 +113,18 @@ public class LoanCommand implements TabExecutor {
                         .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
                         .toList();
             }
-            return List.of();
         }
 
         if (args[0].equalsIgnoreCase("pay")) {
             if (args.length == 2) {
                 return List.of("Amount");
             }
-            return List.of();
+        }
+
+        if (args[0].equalsIgnoreCase("history")) {
+            if (args.length == 2) {
+                return List.of("had", "given");
+            }
         }
         return List.of();
     }
