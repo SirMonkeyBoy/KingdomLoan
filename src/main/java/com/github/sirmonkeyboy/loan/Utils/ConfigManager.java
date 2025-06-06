@@ -22,6 +22,7 @@ public class ConfigManager {
     private int setMaximumPoolSize;
     private int setMinimumIdle;
     private int requestTimeout;
+    private double minimumLoanSize;
     private int cooldown;
     private String cooldownMessage;
     private String invalidAmountMessage;
@@ -55,6 +56,7 @@ public class ConfigManager {
         setMaximumPoolSize = plugin.getConfig().getInt("MariaDB.Set-Maximum-Pool-Size", 15);
         setMinimumIdle = plugin.getConfig().getInt("MariaDB.Set-Minimum-Idle", 2);
         requestTimeout = plugin.getConfig().getInt("Loan-Request.Timeout", 120);
+        minimumLoanSize = plugin.getConfig().getDouble("Loan-Request.Minimum-Loan-Size", 10000);
         cooldown = plugin.getConfig().getInt("Cooldown.Cooldown", 20);
         cooldownMessage = plugin.getConfig().getString("Cooldown.Cooldown-Message", "You must wait %Seconds% seconds before using /loan again.");
         invalidAmountMessage = plugin.getConfig().getString("Invalid-Amount", "Invalid amount. Please enter a number greater than zero.");
@@ -118,6 +120,10 @@ public class ConfigManager {
 
     public int getTimeoutTicks() {
         return requestTimeout * 20;
+    }
+
+    public double getMinimumLoanSize() {
+        return minimumLoanSize;
     }
 
     public int getCooldown() {
