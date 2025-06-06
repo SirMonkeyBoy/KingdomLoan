@@ -1,8 +1,21 @@
 
-#MariaDB is needed for the plugin to work
+#MariaDB is needed for the plugin to work.
 MariaDB:
   host: localhost
   port: 3306
   database: Loan
   username: Loan
   password: password
+
+Loan-Request:
+  # Timeout in seconds.
+  Timeout: 120
+
+Cooldown:
+  # Cooldown in seconds between bank interactions
+  Cooldown: 20
+  # Cooldown message
+  Cooldown-Message: "You must wait %Seconds% seconds before using /loan again."
+
+# if player doesn't enter a number
+Invalid-Amount: "Invalid amount. Please enter a number greater than zero."
