@@ -3,9 +3,13 @@ package com.github.sirmonkeyboy.loan.Utils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.bukkit.entity.Player;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class MariaDB {
 
@@ -51,6 +55,8 @@ public class MariaDB {
 
     public void createTable() throws SQLException {
         try (Connection conn = getConnection()) {
+            conn.setAutoCommit(true);
+
                 PreparedStatement pstmt = conn.prepareStatement("""
                         CREATE TABLE IF NOT EXISTS Loan (
                         loanId INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
@@ -86,6 +92,63 @@ public class MariaDB {
 
             PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS LoanHistory_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
             pstmt4.executeUpdate();
+        }
+    }
+
+    public void updatePlayerName(Player p) throws SQLException {
+        UUID uuid = p.getUniqueId();
+        String name = p.getName();
+
+        Connection conn = null;
+
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT NAME FROM Loan WHERE UUID = ?")) {
+                pstmt.setString(1, uuid.toString());
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String storedName = rs.getString("NAME");
+
+                        if (storedName == null || !storedName.equalsIgnoreCase(name)) {
+                            try (PreparedStatement updatePNameBank = conn.prepareStatement("UPDATE Loan SET NAME = ? WHERE UUID = ?")) {
+                                updatePNameBank.setString(1, name);
+                                updatePNameBank.setString(2, uuid.toString());
+                                updatePNameBank.executeUpdate();
+                            }
+
+                            try (PreparedStatement updatePNameTransactions = conn.prepareStatement("UPDATE LoanHistory SET NAME = ? WHERE UUID = ?")) {
+                                updatePNameTransactions.setString(1, name);
+                                updatePNameTransactions.setString(2, uuid.toString());
+                                updatePNameTransactions.executeUpdate();
+                            }
+                        }
+                    }
+                }
+            }
+            conn.commit();
+        }catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.addSuppressed(e);
+                    Utils.getErrorLogger("Error updating player name in Loan database tables: " + rollbackEx.getMessage());
+                    throw rollbackEx;
+                }
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    Utils.getErrorLogger(ex.getMessage());
+                }
+            }
         }
     }
 }
