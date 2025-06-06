@@ -62,7 +62,7 @@ public class MariaDB {
                         amountToPayBack DOUBLE,
                         amountPaid DOUBLE,
                         amountPaidOut DOUBLE,
-                        PRIMARY KEY(id)
+                        PRIMARY KEY(loanId)
                         )""");
                 pstmt.executeUpdate();
 

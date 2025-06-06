@@ -27,6 +27,7 @@ public class ConfigManager {
 
     public ConfigManager(Loan plugin) {
         this.plugin = plugin;
+        load();
     }
 
     public void reloadConfigManager(CommandSender sender) {
