@@ -10,12 +10,14 @@ MariaDB:
 Loan-Request:
   # Timeout in seconds.
   Timeout: 120
+  # Minimum loan size.
+  Minimum-Loan-Size: 100000
 
 Cooldown:
-  # Cooldown in seconds between bank interactions
+  # Cooldown in seconds between bank interactions.
   Cooldown: 20
-  # Cooldown message
+  # Cooldown message.
   Cooldown-Message: "You must wait %Seconds% seconds before using /loan again."
 
-# if player doesn't enter a number
+# if player doesn't enter a number.
 Invalid-Amount: "Invalid amount. Please enter a number greater than zero."
