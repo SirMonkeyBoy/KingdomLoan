@@ -76,7 +76,12 @@ public class LoanCommand implements TabExecutor {
                     return true;
 
                 case "pay":
-                    p.sendMessage("test");
+                    try {
+                        loanManager.loanPay(p, args);
+                    } catch (SQLException e) {
+                        p.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
+                        throw new RuntimeException(e);
+                    }
                     return true;
 
                 case "list":
