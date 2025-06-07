@@ -1,7 +1,14 @@
 package com.github.sirmonkeyboy.loan.Utils;
 
+import com.github.sirmonkeyboy.loan.Loan;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+
+import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.entity.Player;
 
@@ -66,7 +73,7 @@ public class MariaDB {
                         nameOfLoaned VARCHAR(255),
                         loanAmount DOUBLE,
                         payBackAmount DOUBLE,
-                        amountPaid DOUBLE,
+                        amountPaid DOUBLE DEFAULT 0,
                         amountPaidOut DOUBLE,
                         PRIMARY KEY(loanId)
                         )""");
@@ -213,6 +220,99 @@ public class MariaDB {
                     pstmt.setTimestamp(7, timestamp);
                     pstmt.executeUpdate();
                 }
+
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                try {
+                    conn.rollback();
+                    return false;
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.addSuppressed(e);
+                    Utils.getErrorLogger("Error creating loan: " + rollbackEx.getMessage());
+                    throw rollbackEx;
+                }
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    public boolean loanPay(Player player, UUID uuidOfLoaned, double payAmount) throws SQLException {
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                double currentAmountPaid;
+                double payBackAmount;
+                double stillNeedToPayBack;
+                String nameOfLoaner;
+
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                        "SELECT amountPaid, payBackAmount, nameOfLoaner FROM Loan WHERE uuidOfLoaned = ?")) {
+                    pstmt.setString(1, uuidOfLoaned.toString());
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            currentAmountPaid = rs.getDouble("amountPaid");
+                            payBackAmount = rs.getDouble("payBackAmount");
+                            stillNeedToPayBack = payBackAmount - currentAmountPaid;
+                            nameOfLoaner = rs.getString("nameOfLoaner");
+                        } else {
+                            throw new SQLException("UUID not found in Loan table");
+                        }
+                    }
+                }
+
+                if (payAmount > stillNeedToPayBack) {
+                    player.sendMessage(Component.text("You are trying to pay more then you owe you only owe $" + stillNeedToPayBack).color(NamedTextColor.RED));
+                    return true;
+                }
+
+                if (payAmount == stillNeedToPayBack) {
+                    try (PreparedStatement pstmt = conn.prepareStatement(
+                            "DELETE FROM Loan WHERE uuidOfLoaned = ?")) {
+                        pstmt.setString(1, uuidOfLoaned.toString());
+
+                        pstmt.executeUpdate();
+                    }
+
+                    try (PreparedStatement pstmt = conn.prepareStatement(
+                            "UPDATE LoanHistory SET loanEndDate = ? WHERE uuidOfLoaned = ? ")) {
+                        long currentTimeMillis = System.currentTimeMillis();
+                        java.sql.Timestamp timestamp = new java.sql.Timestamp(currentTimeMillis);
+                        pstmt.setTimestamp(1, timestamp);
+                        pstmt.setString(2, uuidOfLoaned.toString());
+
+                        pstmt.executeUpdate();
+                    }
+
+                    // IDK if it's the best spot to do this, but it for now will work.
+                    Economy eco = Loan.getEconomy();
+
+                    // This will get changed this is only to make it work I have a better method I just need to add it.
+                    eco.depositPlayer(nameOfLoaner, payAmount);
+                    eco.withdrawPlayer(player, payAmount);
+
+                    player.sendMessage(Component.text("Loan has been paid off.").color(NamedTextColor.GREEN));
+
+                    conn.commit();
+                    return true;
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                        "UPDATE Loan SET amountPaid = amountPaid + ? WHERE uuidOfLoaned = ?")) {
+                    pstmt.setDouble(1, payAmount);
+                    pstmt.setString(2, uuidOfLoaned.toString());
+
+                    pstmt.executeUpdate();
+                }
+
+                // IDK if it's the best spot to do this, but it for now will work.
+                Economy eco = Loan.getEconomy();
+
+                // This will get changed this is only to make it work I have a better method I just need to add it.
+                eco.depositPlayer(nameOfLoaner, payAmount);
+                eco.withdrawPlayer(player, payAmount);
 
                 conn.commit();
                 return true;
