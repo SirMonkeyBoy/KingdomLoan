@@ -97,36 +97,62 @@ public class MariaDB {
 
     public void updatePlayerName(Player p) throws SQLException {
         UUID uuid = p.getUniqueId();
+        String uuidStr = String.valueOf(uuid);
         String name = p.getName();
 
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
-            try (PreparedStatement pstmt = conn.prepareStatement("SELECT NAME FROM Loan WHERE UUID = ?")) {
-                pstmt.setString(1, uuid.toString());
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner, nameOfLoaned, uuidOfLoaner, uuidOfLoaned FROM Loan WHERE uuidOfLoaner = ? or uuidOfLoaned = ?")) {
+                pstmt.setString(1, uuidStr);
+                pstmt.setString(2, uuidStr);
 
                 try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        String storedName = rs.getString("NAME");
 
-                        if (storedName == null || !storedName.equalsIgnoreCase(name)) {
-                            try (PreparedStatement updatePNameBank = conn.prepareStatement("UPDATE Loan SET NAME = ? WHERE UUID = ?")) {
-                                updatePNameBank.setString(1, name);
-                                updatePNameBank.setString(2, uuid.toString());
-                                updatePNameBank.executeUpdate();
-                            }
+                    boolean updateLoanerName = false;
+                    boolean updateLoanedName = false;
 
-                            try (PreparedStatement updatePNameTransactions = conn.prepareStatement("UPDATE LoanHistory SET NAME = ? WHERE UUID = ?")) {
-                                updatePNameTransactions.setString(1, name);
-                                updatePNameTransactions.setString(2, uuid.toString());
-                                updatePNameTransactions.executeUpdate();
-                            }
+                    while (rs.next()) {
+                        if (uuidStr.equals(rs.getString("uuidOfLoaner")) && !name.equals(rs.getString("nameOfLoaner"))) {
+                            updateLoanerName = true;
+                        }
+
+                        if (uuidStr.equals(rs.getString("uuidOfLoaned")) && !name.equals(rs.getString("nameOfLoaned"))) {
+                            updateLoanedName = true;
+                        }
+                    }
+
+                    if (updateLoanerName) {
+                        try (PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Loan SET nameOfLoaner = ? WHERE uuidOfLoaner = ?")) {
+                            pstmt2.setString(1, name);
+                            pstmt2.setString(2, uuidStr);
+                            pstmt2.executeUpdate();
+                        }
+
+                        try (PreparedStatement pstmt3 = conn.prepareStatement("UPDATE LoanHistory SET nameOfLoaner = ? WHERE uuidOfLoaner = ?")) {
+                            pstmt3.setString(1, name);
+                            pstmt3.setString(2, uuidStr);
+                            pstmt3.executeUpdate();
+                        }
+                    }
+
+                    if (updateLoanedName) {
+                        try (PreparedStatement pstmt4 = conn.prepareStatement("UPDATE Loan SET nameOfLoaned = ? WHERE uuidOfLoaned = ?")) {
+                            pstmt4.setString(1, name);
+                            pstmt4.setString(2, uuidStr);
+                            pstmt4.executeUpdate();
+                        }
+
+                        try (PreparedStatement pstmt5 = conn.prepareStatement("UPDATE LoanHistory SET nameOfLoaned = ? WHERE uuidOfLoaned = ?")) {
+                            pstmt5.setString(1, name);
+                            pstmt5.setString(2, uuidStr);
+                            pstmt5.executeUpdate();
                         }
                     }
                 }
-
+                
                 conn.commit();
-            }catch (SQLException e) {
+            } catch (SQLException e) {
                 try {
                     conn.rollback();
                 } catch (SQLException rollbackEx) {
