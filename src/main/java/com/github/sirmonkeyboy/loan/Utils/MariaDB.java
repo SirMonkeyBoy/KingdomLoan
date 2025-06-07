@@ -181,4 +181,54 @@ public class MariaDB {
         }
         return null;
     }
+
+    public boolean loanAccept(UUID uuidOfLoaner, String nameOfLoaner, UUID uuidOfLoaned, String nameOfLoaned, double loanAmount, double payBackAmount) throws SQLException {
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO Loan " +
+                        "(uuidOfLoaner, nameOfLoaner, uuidOfLoaned, nameOfLoaned, loanAmount, payBackAmount)" +
+                        " VALUES (?, ?, ?, ?, ?, ?)")) {
+                    pstmt.setString(1, uuidOfLoaner.toString());
+                    pstmt.setString(2, nameOfLoaner);
+                    pstmt.setString(3, uuidOfLoaned.toString());
+                    pstmt.setString(4, nameOfLoaned);
+                    pstmt.setDouble(5, loanAmount);
+                    pstmt.setDouble(6, payBackAmount);
+                    pstmt.executeUpdate();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO LoanHistory " +
+                        "(uuidOfLoaner, nameOfLoaner, uuidOfLoaned, nameOfLoaned, loanAmount, payBackAmount, loanStartDate)" +
+                        " VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    java.sql.Timestamp timestamp = new java.sql.Timestamp(currentTimeMillis);
+                    pstmt.setString(1, uuidOfLoaner.toString());
+                    pstmt.setString(2, nameOfLoaner);
+                    pstmt.setString(3, uuidOfLoaned.toString());
+                    pstmt.setString(4, nameOfLoaned);
+                    pstmt.setDouble(5, loanAmount);
+                    pstmt.setDouble(6, payBackAmount);
+                    pstmt.setTimestamp(7, timestamp);
+                    pstmt.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                try {
+                    conn.rollback();
+                    return false;
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.addSuppressed(e);
+                    Utils.getErrorLogger("Error creating loan: " + rollbackEx.getMessage());
+                    throw rollbackEx;
+                }
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
 }
