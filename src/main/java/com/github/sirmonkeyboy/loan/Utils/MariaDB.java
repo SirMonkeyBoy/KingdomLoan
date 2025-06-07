@@ -238,6 +238,28 @@ public class MariaDB {
         }
     }
 
+    public double getAmountLeftOnLoan(UUID uuidOfLoaned) throws SQLException {
+        try (Connection conn = getConnection()) {
+            double currentAmountPaid;
+            double payBackAmount;
+            double stillNeedToPayBack;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "SELECT amountPaid, payBackAmount FROM Loan WHERE uuidOfLoaned = ?")) {
+                pstmt.setString(1, uuidOfLoaned.toString());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        currentAmountPaid = rs.getDouble("amountPaid");
+                        payBackAmount = rs.getDouble("payBackAmount");
+                         return stillNeedToPayBack = payBackAmount - currentAmountPaid;
+                    } else {
+                        throw new SQLException("UUID not found in Loan table");
+                    }
+                }
+            }
+        }
+    }
+
     public boolean loanPay(Player player, UUID uuidOfLoaned, double payAmount) throws SQLException {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
