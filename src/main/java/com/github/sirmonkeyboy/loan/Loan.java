@@ -26,9 +26,9 @@ public final class Loan extends JavaPlugin {
         this.saveDefaultConfig();
 
         ConfigManager configManager = new ConfigManager(this);
-        CooldownManager cooldownManager = new CooldownManager(configManager.getCooldown());
         this.data = new MariaDB(configManager);
-        this.loanManager = new LoanManager(this, configManager, cooldownManager);
+        CooldownManager cooldownManager = new CooldownManager(configManager.getCooldown());
+        this.loanManager = new LoanManager(this, configManager, data, cooldownManager);
 
         if (!setupEconomy() ) {
             Utils.getErrorLogger("Disabled due to no Vault dependency found!");
