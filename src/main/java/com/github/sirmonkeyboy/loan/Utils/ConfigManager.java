@@ -26,9 +26,6 @@ public class ConfigManager {
     private int cooldown;
     private String cooldownMessage;
     private String invalidAmountMessage;
-    // This is set here so it can't get removed in config
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String missingMessage = "Contact Server Admin missing message in config";
 
     public ConfigManager(Loan plugin) {
         this.plugin = plugin;

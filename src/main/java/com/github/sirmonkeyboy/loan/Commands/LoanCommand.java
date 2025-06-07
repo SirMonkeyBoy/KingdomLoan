@@ -6,7 +6,6 @@ import com.github.sirmonkeyboy.loan.Utils.LoanManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -32,7 +31,6 @@ public class LoanCommand implements TabExecutor {
 
     @Override
     public boolean onCommand (@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args){
-        Economy eco = Loan.getEconomy();
         if (sender instanceof Player p){
             if (!p.hasPermission("Loan.commands.loan")) {
                 p.sendMessage(Component.text("You Don't have permission to use /loan").color(NamedTextColor.RED));
