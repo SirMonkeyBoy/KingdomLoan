@@ -128,8 +128,68 @@ public class LoanManager {
         }
     }
 
-    public boolean loanAccept(Player player, String[] args) {
-        return false;
+    public boolean loanAccept(Player player, String[] args) throws SQLException {
+
+        if (args.length < 2) {
+            player.sendMessage(Component.text("Usage /loan accept (User loaning you money)").color(NamedTextColor.RED));
+            return true;
+        }
+
+        Player target  = Bukkit.getPlayer(args[1]);
+
+        UUID playerUUID = player.getUniqueId();
+        String playerName = player.getName();
+
+
+        String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
+        if (nameOfLoaner != null) {
+            player.sendMessage(Component.text( "You already has a loan from " + nameOfLoaner).color(NamedTextColor.RED));
+            return true;
+        }
+
+
+        if (target == null || !target.isOnline()) {
+            player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
+            return true;
+        }
+        UUID targetUUID = target.getUniqueId();
+        String targetName = target.getName();
+
+        LoanData loanData = loanRequests.get(playerUUID);
+        if (loanData == null) {
+            player.sendMessage(Component.text("You don't have any loan requests.").color(NamedTextColor.RED));
+            return true;
+        }
+
+        UUID requesterUUID = loanData.getRequesterUUID();
+        double loanAmount = loanData.getLoanAmount();
+        double payBackAmount = loanData.getPayBackAmount();
+
+        if (!requesterUUID.equals(targetUUID)) {
+            player.sendMessage(Component.text("No loan request from that player").color(NamedTextColor.RED));
+            return true;
+        }
+
+        Economy eco = Loan.getEconomy();
+
+        if (loanAmount > eco.getBalance(target)) {
+            player.sendMessage(Component.text(targetName + " doesn't have " + loanAmount + " in their balance.").color(NamedTextColor.RED));
+            return true;
+        }
+
+        boolean success = data.loanAccept(targetUUID, targetName, playerUUID, playerName, loanAmount, payBackAmount);
+
+        if (!success) {
+            player.sendMessage(Component.text("Error in creating the loan try again or contact staff.").color(NamedTextColor.RED));
+            return true;
+        }
+        eco.withdrawPlayer(target, loanAmount);
+        eco.depositPlayer(player, loanAmount);
+        player.sendMessage(Component.text("Loan from " + targetName + " for " + loanAmount + " and pay back amount " + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
+        target.sendMessage(Component.text("Loan to " + playerName + " for " + loanAmount + " and pay back amount " + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
+
+        cooldownManager.startCooldown(playerUUID);
+        return true;
     }
 
     public void clearLoanRequests() {
