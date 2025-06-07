@@ -86,12 +86,12 @@ public class LoanManager {
             Economy eco = Loan.getEconomy();
 
             if (loanAmount > eco.getBalance(player)) {
-                player.sendMessage(Component.text("You don't have " + loanAmount + " in your balance.").color(NamedTextColor.RED));
+                player.sendMessage(Component.text("You don't have $" + loanAmount + " in your balance.").color(NamedTextColor.RED));
                 return true;
             }
 
             if (!(loanAmount > configManager.getMinimumLoanSize())) {
-                player.sendMessage(Component.text("Minimum loan size is 100000.").color(NamedTextColor.RED));
+                player.sendMessage(Component.text("Minimum loan size is $100000.").color(NamedTextColor.RED));
                 return true;
             }
 
@@ -152,6 +152,7 @@ public class LoanManager {
             player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
             return true;
         }
+
         UUID targetUUID = target.getUniqueId();
         String targetName = target.getName();
 
@@ -173,7 +174,7 @@ public class LoanManager {
         Economy eco = Loan.getEconomy();
 
         if (loanAmount > eco.getBalance(target)) {
-            player.sendMessage(Component.text(targetName + " doesn't have " + loanAmount + " in their balance.").color(NamedTextColor.RED));
+            player.sendMessage(Component.text(targetName + " doesn't have $" + loanAmount + " in their balance.").color(NamedTextColor.RED));
             return true;
         }
 
@@ -185,8 +186,8 @@ public class LoanManager {
         }
         eco.withdrawPlayer(target, loanAmount);
         eco.depositPlayer(player, loanAmount);
-        player.sendMessage(Component.text("Loan from " + targetName + " for " + loanAmount + " and pay back amount " + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
-        target.sendMessage(Component.text("Loan to " + playerName + " for " + loanAmount + " and pay back amount " + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
+        player.sendMessage(Component.text("Loan from " + targetName + " for $" + loanAmount + " and pay back amount $" + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
+        target.sendMessage(Component.text("Loan to " + playerName + " for $" + loanAmount + " and pay back amount $" + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
 
         cooldownManager.startCooldown(playerUUID);
         return true;
