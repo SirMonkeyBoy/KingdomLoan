@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class LoanCommand implements TabExecutor {
@@ -68,7 +69,12 @@ public class LoanCommand implements TabExecutor {
                     return true;
 
                 case "accept":
-                    p.sendMessage("test");
+                    try {
+                        loanManager.loanAccept(p, args);
+                    } catch (SQLException e) {
+                        p.sendMessage(Component.text("Error in creating the loan try again or contact staff.").color(NamedTextColor.RED));
+                        throw new RuntimeException(e);
+                    }
                     return true;
 
                 case "pay":
