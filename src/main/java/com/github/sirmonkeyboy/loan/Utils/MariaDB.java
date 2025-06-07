@@ -64,11 +64,11 @@ public class MariaDB {
                         nameOfLoaner VARCHAR(255),
                         uuidOfLoaned VARCHAR(255),
                         nameOfLoaned VARCHAR(255),
-                        amountLoaned DOUBLE,
-                        amountToPayBack DOUBLE,
+                        loanAmount DOUBLE,
+                        payBackAmount DOUBLE,
                         amountPaid DOUBLE,
                         amountPaidOut DOUBLE,
-                        PRIMARY KEY(loanId, uuidOfLoaned)
+                        PRIMARY KEY(loanId)
                         )""");
                 pstmt.executeUpdate();
 
@@ -82,15 +82,15 @@ public class MariaDB {
                         nameOfLoaner VARCHAR(255),
                         uuidOfLoaned VARCHAR(255),
                         nameOfLoaned VARCHAR(255),
-                        amountLoaned DOUBLE,
-                        amountToPayBack DOUBLE,
+                        loanAmount DOUBLE,
+                        payBackAmount DOUBLE,
                         loanStartDate TIMESTAMP,
                         loanEndDate TIMESTAMP,
                         PRIMARY KEY(loanHistoryId)
                         )""");
             pstmt3.executeUpdate();
 
-            PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS LoanHistory_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
+            PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS LoanHistory_index_0 ON LoanHistory (uuidOfLoaner, uuidOfLoaned);");
             pstmt4.executeUpdate();
         }
     }
@@ -150,7 +150,7 @@ public class MariaDB {
                         }
                     }
                 }
-                
+
                 conn.commit();
             } catch (SQLException e) {
                 try {
@@ -165,5 +165,20 @@ public class MariaDB {
                 conn.setAutoCommit(true);
             }
         }
+    }
+
+    public String checkIfHaveLoan(UUID uuid) throws SQLException {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner FROM Loan WHERE uuidOfLoaned = ?")) {
+
+            pstmt.setString(1, uuid.toString());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("nameOfLoaner");
+                }
+            }
+        }
+        return null;
     }
 }
