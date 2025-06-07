@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -20,15 +21,18 @@ public class LoanManager {
 
     private final ConfigManager configManager;
 
+    private final MariaDB data;
+
     private final CooldownManager cooldownManager;
 
     private final HashMap<UUID, LoanData> loanRequests = new HashMap<>();
 
     private final HashMap<UUID, BukkitTask> requestTimeout = new HashMap<>();
 
-    public LoanManager(Loan plugin, ConfigManager configManager, CooldownManager cooldownManager) {
+    public LoanManager(Loan plugin, ConfigManager configManager, MariaDB data, CooldownManager cooldownManager) {
         this.plugin = plugin;
         this.configManager = configManager;
+        this.data = data;
         this.cooldownManager = cooldownManager;
     }
 
@@ -67,6 +71,11 @@ public class LoanManager {
             if (targetUUID.equals(playerUUID)) {
                 player.sendMessage(Component.text("You cannot loan to yourself.").color(NamedTextColor.RED));
                 return true;
+            }
+
+            String nameOfLoaner = data.checkIfHaveLoan(targetUUID);
+            if (nameOfLoaner != null) {
+                player.sendMessage(Component.text(targetName + " already has a loan from " + nameOfLoaner));
             }
 
             if (requestTimeout.containsKey(targetUUID)) {
@@ -113,7 +122,7 @@ public class LoanManager {
 
             cooldownManager.startCooldown(playerUUID);
             return true;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | SQLException e) {
             player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
             throw new RuntimeException(e);
         }
