@@ -5,6 +5,8 @@ import com.github.sirmonkeyboy.loan.Loan;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -42,6 +44,43 @@ public class LoanManager {
             double loanAmount = Double.parseDouble(args[2]);
             double payBackAmount = Double.parseDouble(args[3]);
 
+            Player target = Bukkit.getPlayer(args[1]);
+
+            UUID playerUUID = player.getUniqueId();
+            String playerName = player.getName();
+
+            if (cooldownManager.isOnCooldown(playerUUID)) {
+                long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
+                String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
+                player.sendMessage(CooldownMessage);
+                return true;
+            }
+
+            if (target == null || !target.isOnline()) {
+                player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
+                return true;
+            }
+
+            UUID targetUUID = target.getUniqueId();
+            String targetName = target.getName();
+
+            if (targetUUID.equals(playerUUID)) {
+                player.sendMessage(Component.text("You cannot loan to yourself.").color(NamedTextColor.RED));
+                return true;
+            }
+
+            if (requestTimeout.containsKey(targetUUID)) {
+                player.sendMessage(targetName + " already has a loan request wait seconds for it to timeout.");
+                return true;
+            }
+
+            Economy eco = Loan.getEconomy();
+
+            if (loanAmount > eco.getBalance(player)) {
+                player.sendMessage(Component.text("You don't have " + loanAmount + " in your balance.").color(NamedTextColor.RED));
+                return true;
+            }
+
             if (!(loanAmount > configManager.getMinimumLoanSize())) {
                 player.sendMessage(Component.text("Minimum loan size is 100000.").color(NamedTextColor.RED));
                 return true;
@@ -52,35 +91,11 @@ public class LoanManager {
                 return true;
             }
 
-            Player target = Bukkit.getPlayer(args[1]);
-
-          if (target == null || !target.isOnline()) {
-              player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
-              return true;
-          }
-
-            UUID playerUUID = player.getUniqueId();
-            String playerName = player.getName();
-            UUID targetUUID = target.getUniqueId();
-            String targetName = target.getName();
-
-            if (cooldownManager.isOnCooldown(playerUUID)) {
-                long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
-                String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
-                player.sendMessage(CooldownMessage);
-                return true;
-            }
-
-          if (targetUUID.equals(playerUUID)) {
-              player.sendMessage(Component.text("You cannot loan to yourself.").color(NamedTextColor.RED));
-              return true;
-          }
-
             loanRequests.put(targetUUID, new LoanData(playerUUID, loanAmount, payBackAmount));
 
             BukkitTask Timeout = Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 LoanData loanData = loanRequests.get(targetUUID);
-                if (loanData != null &&
+                if (loanData != null && loanRequests.containsKey(targetUUID) &&
                         loanRequests.get(targetUUID).getRequesterUUID().equals(playerUUID)) {
                     loanRequests.remove(targetUUID);
                     requestTimeout.remove(targetUUID);
@@ -94,7 +109,7 @@ public class LoanManager {
             player.sendMessage(Component.text("Loan request sent to " + playerName));
             player.sendMessage(Component.text("They have " + configManager.getRequestTimeout() + " seconds to accept"));
             target.sendMessage(Component.text(playerName + " is offering to loan you $" + loanAmount + " you will have to pay them back $" + payBackAmount));
-            target.sendMessage(Component.text("Type /loan accept " + playerName + " to accept."));
+            target.sendMessage(Component.text("Type /loan accept " + playerName + " to accept request will timeout in " + configManager.getRequestTimeout() +" seconds."));
 
             cooldownManager.startCooldown(playerUUID);
             return true;
@@ -106,5 +121,10 @@ public class LoanManager {
 
     public boolean loanAccept(Player player, String[] args) {
         return false;
+    }
+
+    public void clearLoanRequests() {
+        requestTimeout.clear();
+        loanRequests.clear();
     }
 }
