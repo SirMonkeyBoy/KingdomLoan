@@ -6,6 +6,8 @@ MariaDB:
   database: Loan
   username: Loan
   password: password
+  Set-Maximum-Pool-Size: 15
+  Set-Minimum-Idle: 6
 
 Loan-Request:
   # Timeout in seconds.

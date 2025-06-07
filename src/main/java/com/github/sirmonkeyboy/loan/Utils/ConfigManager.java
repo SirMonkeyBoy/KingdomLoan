@@ -51,7 +51,7 @@ public class ConfigManager {
         username = plugin.getConfig().getString("MariaDB.username", "Loan");
         password = plugin.getConfig().getString("MariaDB.password", "password");
         setMaximumPoolSize = plugin.getConfig().getInt("MariaDB.Set-Maximum-Pool-Size", 15);
-        setMinimumIdle = plugin.getConfig().getInt("MariaDB.Set-Minimum-Idle", 2);
+        setMinimumIdle = plugin.getConfig().getInt("MariaDB.Set-Minimum-Idle", 6);
         requestTimeout = plugin.getConfig().getInt("Loan-Request.Timeout", 120);
         minimumLoanSize = plugin.getConfig().getDouble("Loan-Request.Minimum-Loan-Size", 10000);
         cooldown = plugin.getConfig().getInt("Cooldown.Cooldown", 20);

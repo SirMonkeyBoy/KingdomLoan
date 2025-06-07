@@ -36,7 +36,7 @@ public class MariaDB {
         config.setPassword(configManager.getPassword());
         config.setMaximumPoolSize(configManager.getSetMaximumPoolSize());
         config.setMinimumIdle(configManager.getSetMinimumIdle());
-        config.setIdleTimeout(30000);
+        config.setIdleTimeout(60000);
         config.setConnectionTimeout(30000);
         config.setLeakDetectionThreshold(10000);
 
@@ -74,7 +74,7 @@ public class MariaDB {
                         loanAmount DOUBLE,
                         payBackAmount DOUBLE,
                         amountPaid DOUBLE DEFAULT 0,
-                        amountPaidOut DOUBLE,
+                        amountPaidOut DOUBLE DEFAULT 0,
                         PRIMARY KEY(loanId)
                         )""");
                 pstmt.executeUpdate();
@@ -280,7 +280,8 @@ public class MariaDB {
                             stillNeedToPayBack = payBackAmount - currentAmountPaid;
                             nameOfLoaner = rs.getString("nameOfLoaner");
                         } else {
-                            throw new SQLException("UUID not found in Loan table");
+                            player.sendMessage(Component.text("You don't have a loan.").color(NamedTextColor.RED));
+                            return false;
                         }
                     }
                 }
