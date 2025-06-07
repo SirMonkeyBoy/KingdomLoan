@@ -193,6 +193,62 @@ public class LoanManager {
         return true;
     }
 
+    public void loanPay(Player player, String[] args) throws SQLException {
+        UUID playerUUID = player.getUniqueId();
+
+        if (args.length == 1) {
+
+            String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
+            if (nameOfLoaner == null) {
+                player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.RED));
+                return;
+            }
+
+            double amountLeftOnLoan = data.getAmountLeftOnLoan(player.getUniqueId());
+            if (amountLeftOnLoan != 0) {
+                player.sendMessage(Component.text( "You have " + amountLeftOnLoan + " on your loan.").color(NamedTextColor.GREEN));
+                return;
+            }
+
+            return;
+        }
+
+        if (args.length < 2) {
+            player.sendMessage(Component.text("Usage /loan pay (Amount)").color(NamedTextColor.RED));
+            return;
+        }
+
+        try {
+            double payAmount = Double.parseDouble(args[1]);
+
+            String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
+            if (nameOfLoaner == null) {
+                player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.RED));
+                return;
+            }
+
+            Economy eco = Loan.getEconomy();
+
+            if (payAmount > eco.getBalance(player)) {
+                player.sendMessage(Component.text("You don't have $" + payAmount + " in your balance.").color(NamedTextColor.RED));
+                return;
+            }
+
+            boolean success = data.loanPay(player, playerUUID, payAmount);
+
+            if (!success) {
+                player.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
+                return;
+            }
+
+            player.sendMessage(Component.text("Paid down loan by $" + payAmount).color(NamedTextColor.GREEN));
+
+        } catch (NumberFormatException e) {
+            player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
+            throw new RuntimeException(e);
+        }
+    }
+
     public void clearLoanRequests() {
         requestTimeout.clear();
         loanRequests.clear();
