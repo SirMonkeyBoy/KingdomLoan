@@ -22,5 +22,6 @@ public class PlayerJoinListener implements Listener {
     public void onJoinEvent(PlayerJoinEvent event) throws SQLException {
         Player player = event.getPlayer();
         data.updatePlayerName(player);
+        data.loanPayOutToLoaner(player);
     }
 }

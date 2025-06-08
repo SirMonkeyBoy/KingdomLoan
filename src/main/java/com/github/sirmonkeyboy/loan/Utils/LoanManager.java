@@ -241,6 +241,8 @@ public class LoanManager {
                 return;
             }
 
+            eco.withdrawPlayer(player, payAmount);
+
             player.sendMessage(Component.text("Paid down loan by $" + payAmount).color(NamedTextColor.GREEN));
 
         } catch (NumberFormatException e) {
