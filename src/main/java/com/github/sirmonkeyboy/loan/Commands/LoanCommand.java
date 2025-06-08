@@ -42,7 +42,11 @@ public class LoanCommand implements TabExecutor {
                 p.sendMessage(Component.text("/loan create (user your loaning to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a loan.").color(NamedTextColor.GOLD)));
                 p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
                 p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
-                p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the loan you have or loans have given out.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan history - ").append(Component.text("Shows you the loans you have had or loans have given out.").color(NamedTextColor.GOLD)));
+                if (p.hasPermission("Loan.commands.loan.history.other")) {
+                    p.sendMessage(Component.text("/loan history (Others username) - ").append(Component.text("Shows you the loans another player has had or loans they have given out.").color(NamedTextColor.GOLD)));
+                }
                 return true;
             }
 
@@ -55,7 +59,11 @@ public class LoanCommand implements TabExecutor {
                     p.sendMessage(Component.text("/loan create (user your loaning to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a loan.").color(NamedTextColor.GOLD)));
                     p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
                     p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
-                    p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the loan you have or loans have given out.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan history - ").append(Component.text("Shows you the loans you have had or loans have given out.").color(NamedTextColor.GOLD)));
+                    if (p.hasPermission("Loan.commands.loan.history.other")) {
+                        p.sendMessage(Component.text("/loan history (Others username) - ").append(Component.text("Shows you the loans another player has had or loans they have given out.").color(NamedTextColor.GOLD)));
+                    }
                     return true;
 
                 case "create":
@@ -99,7 +107,7 @@ public class LoanCommand implements TabExecutor {
     @Override
     public @Nullable List<String> onTabComplete (@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args){
         if (args.length == 1) {
-            return List.of("help", "create", "accept", "pay", "list");
+            return List.of("help", "create", "accept", "pay", "list", "history");
         }
 
         if (args[0].equalsIgnoreCase("create")) {
@@ -136,7 +144,12 @@ public class LoanCommand implements TabExecutor {
 
         if (args[0].equalsIgnoreCase("history")) {
             if (args.length == 2) {
-                return List.of("had", "given");
+                if (sender.hasPermission("Loan.commands.loan.history.other")) {
+                        return plugin.getServer().getOnlinePlayers().stream()
+                                .map(Player::getName)
+                                .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                                .toList();
+                }
             }
         }
         return List.of();

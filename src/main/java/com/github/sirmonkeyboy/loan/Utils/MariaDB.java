@@ -382,7 +382,7 @@ public class MariaDB {
                                         pstmt2.setLong(1, loanId);
                                         pstmt2.executeUpdate();
 
-                                        player.sendMessage(Component.text(nameOfLoaned + "successfully paid off there loan.").color(NamedTextColor.GREEN));
+                                        player.sendMessage(Component.text(nameOfLoaned + " successfully paid off there loan.").color(NamedTextColor.GREEN));
                                     }
                                 } else {
                                     batchUpdate.setDouble(1, amountPaid);

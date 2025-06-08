@@ -207,7 +207,7 @@ public class LoanManager {
 
             double amountLeftOnLoan = data.getAmountLeftOnLoan(player.getUniqueId());
             if (amountLeftOnLoan != 0) {
-                player.sendMessage(Component.text( "You have " + amountLeftOnLoan + " on your loan.").color(NamedTextColor.GREEN));
+                player.sendMessage(Component.text( "You have $" + amountLeftOnLoan + " on your loan.").color(NamedTextColor.GREEN));
                 return;
             }
 
