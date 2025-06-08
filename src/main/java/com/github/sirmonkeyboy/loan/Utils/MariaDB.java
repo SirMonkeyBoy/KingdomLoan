@@ -266,17 +266,15 @@ public class MariaDB {
                 double currentAmountPaid;
                 double payBackAmount;
                 double stillNeedToPayBack;
-                String nameOfLoaner;
 
                 try (PreparedStatement pstmt = conn.prepareStatement(
-                        "SELECT amountPaid, payBackAmount, nameOfLoaner FROM Loan WHERE uuidOfLoaned = ?")) {
+                        "SELECT amountPaid, payBackAmount FROM Loan WHERE uuidOfLoaned = ?")) {
                     pstmt.setString(1, uuidOfLoaned.toString());
                     try (ResultSet rs = pstmt.executeQuery()) {
                         if (rs.next()) {
                             currentAmountPaid = rs.getDouble("amountPaid");
                             payBackAmount = rs.getDouble("payBackAmount");
                             stillNeedToPayBack = payBackAmount - currentAmountPaid;
-                            nameOfLoaner = rs.getString("nameOfLoaner");
                         } else {
                             player.sendMessage(Component.text("You don't have a loan.").color(NamedTextColor.RED));
                             return false;
@@ -286,19 +284,28 @@ public class MariaDB {
 
                 if (payAmount > stillNeedToPayBack) {
                     player.sendMessage(Component.text("You are trying to pay more then you owe you only owe $" + stillNeedToPayBack).color(NamedTextColor.RED));
-                    return true;
+                    return false;
                 }
 
-                if (payAmount == stillNeedToPayBack) {
+                if (Math.abs(payAmount - stillNeedToPayBack) < 0.01) {
                     try (PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM Loan WHERE uuidOfLoaned = ?")) {
-                        pstmt.setString(1, uuidOfLoaned.toString());
+                            "UPDATE Loan SET uuidOfLoaned = null, amountPaid = amountPaid + ? WHERE uuidOfLoaned = ?")) {
+                        pstmt.setDouble(1, payAmount);
+                        pstmt.setString(2, uuidOfLoaned.toString());
 
                         pstmt.executeUpdate();
                     }
 
                     try (PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE LoanHistory SET loanEndDate = ? WHERE uuidOfLoaned = ? ")) {
+                            "UPDATE LoanHistory " +
+                                    "SET loanEndDate = ? " +
+                                    "WHERE loanHistoryId = (" +
+                                    "   SELECT loanHistoryId FROM (" +
+                                    "       SELECT loanHistoryId FROM LoanHistory " +
+                                    "       WHERE uuidOfLoaned = ? AND loanEndDate IS NULL " +
+                                    "       ORDER BY loanStartDate DESC LIMIT 1" +
+                                    "   ) AS sub" +
+                                    ")")) {
                         long currentTimeMillis = System.currentTimeMillis();
                         Timestamp timestamp = new Timestamp(currentTimeMillis);
                         pstmt.setTimestamp(1, timestamp);
@@ -306,13 +313,6 @@ public class MariaDB {
 
                         pstmt.executeUpdate();
                     }
-
-                    // IDK if it's the best spot to do this, but it for now will work.
-                    Economy eco = Loan.getEconomy();
-
-                    // This will get changed this is only to make it work I have a better method I just need to add it.
-                    eco.depositPlayer(nameOfLoaner, payAmount);
-                    eco.withdrawPlayer(player, payAmount);
 
                     player.sendMessage(Component.text("Loan has been paid off.").color(NamedTextColor.GREEN));
 
