@@ -359,25 +359,34 @@ public class MariaDB {
 
                 try ( PreparedStatement batchUpdate = conn.prepareStatement("UPDATE Loan SET amountPaidOut = ? WHERE loanID = ?");
                       PreparedStatement pstmt = conn.prepareStatement(
-                        "SELECT loanId, nameOfLoaned, amountPaid, amountPaidOut FROM Loan WHERE uuidOfLoaner = ?")) {
+                        "SELECT loanId, nameOfLoaned, payBackAmount, amountPaid, amountPaidOut FROM Loan WHERE uuidOfLoaner = ?")) {
                     pstmt.setString(1, String.valueOf(player.getUniqueId()));
                     try (ResultSet rs = pstmt.executeQuery()) {
                         while (rs.next()) {
-                            int loanId = rs.getInt("loanId");
+                            long loanId = rs.getLong("loanId");
                             String nameOfLoaned = rs.getString("nameOfLoaned");
+                            double payBackAmount = rs.getDouble("payBackAmount");
                             double amountPaid = rs.getDouble("amountPaid");
                             double amountPaidOut = rs.getDouble("amountPaidOut");
 
                             double amountToPayOut = amountPaid - amountPaidOut;
 
-                            if (amountToPayOut > 0) {
-                                if (player.isOnline()) {
-                                    eco.depositPlayer(player, amountToPayOut);
-                                    namesOfLoaned.add(nameOfLoaned);
-                                    totalPaidOut += amountToPayOut;
+                            if (amountToPayOut > 0 && player.isOnline()) {
+                                eco.depositPlayer(player, amountToPayOut);
+                                namesOfLoaned.add(nameOfLoaned);
+                                totalPaidOut += amountToPayOut;
 
+                                if (payBackAmount == amountPaidOut + amountToPayOut) {
+                                    try (PreparedStatement pstmt2 = conn.prepareStatement(
+                                            "DELETE FROM Loan WHERE loanId = ?")) {
+                                        pstmt2.setLong(1, loanId);
+                                        pstmt2.executeUpdate();
+
+                                        player.sendMessage(Component.text(nameOfLoaned + "successfully paid off there loan.").color(NamedTextColor.GREEN));
+                                    }
+                                } else {
                                     batchUpdate.setDouble(1, amountPaid);
-                                    batchUpdate.setInt(2, loanId);
+                                    batchUpdate.setLong(2, loanId);
                                     batchUpdate.addBatch();
                                 }
                             }
@@ -392,7 +401,7 @@ public class MariaDB {
                 }
 
                 if (!namesOfLoaned.isEmpty()) {
-                    player.sendMessage(Component.text("You have been paid $" + totalPaidOut + " for loans from " + String.join(", ", namesOfLoaned)));
+                    player.sendMessage(Component.text("You have been paid $" + totalPaidOut + " for loans from " + String.join(", ", namesOfLoaned)).color(NamedTextColor.GREEN));
                 }
 
                 conn.commit();
