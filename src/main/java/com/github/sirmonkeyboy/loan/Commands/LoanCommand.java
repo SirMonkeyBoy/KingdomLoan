@@ -43,10 +43,7 @@ public class LoanCommand implements TabExecutor {
                 p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
                 p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
                 p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
-                p.sendMessage(Component.text("/loan history - ").append(Component.text("Shows you the loans you have had or loans have given out.").color(NamedTextColor.GOLD)));
-                if (p.hasPermission("Loan.commands.loan.history.other")) {
-                    p.sendMessage(Component.text("/loan history (Others username) - ").append(Component.text("Shows you the loans another player has had or loans they have given out.").color(NamedTextColor.GOLD)));
-                }
+                p.sendMessage(Component.text("/loan history (had/given) (page) - ").append(Component.text("List of all loans have had or list of all loans you have given out.").color(NamedTextColor.GOLD)));
                 return true;
             }
 
@@ -60,10 +57,7 @@ public class LoanCommand implements TabExecutor {
                     p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
                     p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
                     p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
-                    p.sendMessage(Component.text("/loan history - ").append(Component.text("Shows you the loans you have had or loans have given out.").color(NamedTextColor.GOLD)));
-                    if (p.hasPermission("Loan.commands.loan.history.other")) {
-                        p.sendMessage(Component.text("/loan history (Others username) - ").append(Component.text("Shows you the loans another player has had or loans they have given out.").color(NamedTextColor.GOLD)));
-                    }
+                    p.sendMessage(Component.text("/loan history (had/given) (page) - ").append(Component.text("List of all loans have had or list of all loans you have given out.").color(NamedTextColor.GOLD)));
                     return true;
 
                 case "create":
@@ -144,12 +138,7 @@ public class LoanCommand implements TabExecutor {
 
         if (args[0].equalsIgnoreCase("history")) {
             if (args.length == 2) {
-                if (sender.hasPermission("Loan.commands.loan.history.other")) {
-                        return plugin.getServer().getOnlinePlayers().stream()
-                                .map(Player::getName)
-                                .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
-                                .toList();
-                }
+                return List.of("had", "given");
             }
         }
         return List.of();

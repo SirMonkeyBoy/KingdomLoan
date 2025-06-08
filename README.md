@@ -8,7 +8,7 @@ Commands:
   - `/loan accept (User loaning you money)`:
      Accepts the loan if you have any pending request for that player loan requests have a 120 seconds time out.
   - `/loan pay (Amount)`: Pays down your loan.
-  - `/loan list`: Lists all the active loans you have give out or the loan you have.
+  - `/loan list`: Shows you the active loan have or a list of all active loans you have given out.
   - `/loan history (had/given) (page)`: List of all loans have had or list of all loans you have given out.
 
 You can give out as many loans as you have money for but the player you have loaned the money to can only have one loan at a time
