@@ -189,6 +189,7 @@ public class LoanManager {
         player.sendMessage(Component.text("Loan from " + targetName + " for $" + loanAmount + " and pay back amount $" + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
         target.sendMessage(Component.text("Loan to " + playerName + " for $" + loanAmount + " and pay back amount $" + payBackAmount + " successfully created.").color(NamedTextColor.GREEN));
 
+        requestTimeout.remove(playerUUID);
         cooldownManager.startCooldown(playerUUID);
         return true;
     }
