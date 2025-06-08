@@ -65,7 +65,7 @@ public class MariaDB {
 
                 PreparedStatement pstmt = conn.prepareStatement("""
                         CREATE TABLE IF NOT EXISTS Loan (
-                        loanId INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+                        loanId BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
                         uuidOfLoaner VARCHAR(255),
                         nameOfLoaner VARCHAR(255),
                         uuidOfLoaned VARCHAR(255),
@@ -83,7 +83,7 @@ public class MariaDB {
 
             PreparedStatement pstmt3 = conn.prepareStatement("""
                         CREATE TABLE IF NOT EXISTS LoanHistory (
-                        loanHistoryId INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+                        loanHistoryId BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
                         uuidOfLoaner VARCHAR(255),
                         nameOfLoaner VARCHAR(255),
                         uuidOfLoaned VARCHAR(255),
