@@ -12,10 +12,9 @@ import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.entity.Player;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class MariaDB {
@@ -210,7 +209,7 @@ public class MariaDB {
                         "(uuidOfLoaner, nameOfLoaner, uuidOfLoaned, nameOfLoaned, loanAmount, payBackAmount, loanStartDate)" +
                         " VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                     long currentTimeMillis = System.currentTimeMillis();
-                    java.sql.Timestamp timestamp = new java.sql.Timestamp(currentTimeMillis);
+                    Timestamp timestamp = new Timestamp(currentTimeMillis);
                     pstmt.setString(1, uuidOfLoaner.toString());
                     pstmt.setString(2, nameOfLoaner);
                     pstmt.setString(3, uuidOfLoaned.toString());
@@ -252,12 +251,11 @@ public class MariaDB {
                         currentAmountPaid = rs.getDouble("amountPaid");
                         payBackAmount = rs.getDouble("payBackAmount");
                          return stillNeedToPayBack = payBackAmount - currentAmountPaid;
-                    } else {
-                        throw new SQLException("UUID not found in Loan table");
                     }
                 }
             }
         }
+        return 0;
     }
 
     public boolean loanPay(Player player, UUID uuidOfLoaned, double payAmount) throws SQLException {
@@ -302,7 +300,7 @@ public class MariaDB {
                     try (PreparedStatement pstmt = conn.prepareStatement(
                             "UPDATE LoanHistory SET loanEndDate = ? WHERE uuidOfLoaned = ? ")) {
                         long currentTimeMillis = System.currentTimeMillis();
-                        java.sql.Timestamp timestamp = new java.sql.Timestamp(currentTimeMillis);
+                        Timestamp timestamp = new Timestamp(currentTimeMillis);
                         pstmt.setTimestamp(1, timestamp);
                         pstmt.setString(2, uuidOfLoaned.toString());
 
@@ -330,23 +328,80 @@ public class MariaDB {
                     pstmt.executeUpdate();
                 }
 
-                // IDK if it's the best spot to do this, but it for now will work.
-                Economy eco = Loan.getEconomy();
-
-                // This will get changed this is only to make it work I have a better method I just need to add it.
-                eco.depositPlayer(nameOfLoaner, payAmount);
-                eco.withdrawPlayer(player, payAmount);
-
                 conn.commit();
                 return true;
             } catch (SQLException e) {
-                e.printStackTrace();
                 try {
                     conn.rollback();
                     return false;
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
-                    Utils.getErrorLogger("Error creating loan: " + rollbackEx.getMessage());
+                    Utils.getErrorLogger("Error paying down loan: " + rollbackEx.getMessage());
+                    throw rollbackEx;
+                }
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void loanPayOutToLoaner(Player player) throws SQLException {
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+
+            List<String> namesOfLoaned = new ArrayList<>();
+
+            double totalPaidOut = 0;
+
+            try {
+
+                Economy eco = Loan.getEconomy();
+
+                try ( PreparedStatement batchUpdate = conn.prepareStatement("UPDATE Loan SET amountPaidOut = ? WHERE loanID = ?");
+                      PreparedStatement pstmt = conn.prepareStatement(
+                        "SELECT loanId, nameOfLoaned, amountPaid, amountPaidOut FROM Loan WHERE uuidOfLoaner = ?")) {
+                    pstmt.setString(1, String.valueOf(player.getUniqueId()));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            int loanId = rs.getInt("loanId");
+                            String nameOfLoaned = rs.getString("nameOfLoaned");
+                            double amountPaid = rs.getDouble("amountPaid");
+                            double amountPaidOut = rs.getDouble("amountPaidOut");
+
+                            double amountToPayOut = amountPaid - amountPaidOut;
+
+                            if (amountToPayOut > 0) {
+                                if (player.isOnline()) {
+                                    eco.depositPlayer(player, amountToPayOut);
+                                    namesOfLoaned.add(nameOfLoaned);
+                                    totalPaidOut += amountToPayOut;
+
+                                    batchUpdate.setDouble(1, amountPaid);
+                                    batchUpdate.setInt(2, loanId);
+                                    batchUpdate.addBatch();
+                                }
+                            }
+                            else if (amountToPayOut < 0) {
+                                Utils.getErrorLogger("Loan [" + loanId + "] has invalid state: amountPaid");
+                                return;
+                            }
+                        }
+                    }
+
+                    batchUpdate.executeBatch();
+                }
+
+                if (!namesOfLoaned.isEmpty()) {
+                    player.sendMessage(Component.text("You have been paid $" + totalPaidOut + " for loans from " + String.join(", ", namesOfLoaned)));
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.addSuppressed(e);
+                    Utils.getErrorLogger("Error paying loaner: " + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
             } finally {
