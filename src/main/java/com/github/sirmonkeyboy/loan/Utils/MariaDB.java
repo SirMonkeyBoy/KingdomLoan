@@ -446,4 +446,42 @@ public class MariaDB {
             }
         }
     }
+
+    public String checkIfPlayerHasLoaned(UUID uuid) throws SQLException {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaned FROM Loan WHERE uuidOfLoaner = ?")) {
+                pstmt.setString(1, uuid.toString());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("nameOfLoaned");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean loanListLoaner(Player player) throws SQLException {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaned, loanAmount, payBackAmount, amountPaid FROM Loan WHERE uuidOfLoaner = ?")) {
+                pstmt.setString(1, player.getUniqueId().toString());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    player.sendMessage(Component.text("List of active loans you have lent out"));
+                    while (rs.next()) {
+                        String nameOfLoaned = rs.getString("nameOfLoaned");
+                        double loanAmount = rs.getDouble("loanAmount");
+                        double payBackAmount = rs.getDouble("payBackAmount");
+                        double amountPaid = rs.getDouble("amountPaid");
+                        double amountLeft = payBackAmount - amountPaid;
+
+                        player.sendMessage(Component.text("You have lent " + nameOfLoaned + " $" + loanAmount + " they still have to pay back $" + amountLeft));
+                    }
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            Utils.getErrorLogger("Error getting players loan: " + e.getMessage());
+            return false;
+        }
+    }
 }
