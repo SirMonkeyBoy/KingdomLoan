@@ -250,6 +250,29 @@ public class LoanManager {
         }
     }
 
+    public void loanList(Player player) throws SQLException {
+        UUID playerUUID = player.getUniqueId();
+        String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
+        if (nameOfLoaner != null) {
+            boolean success = data.loanListLoaned(player);
+            if (!success) {
+                player.sendMessage(Component.text("Error getting your loan info.").color(NamedTextColor.RED));
+            }
+            return;
+        }
+
+        String nameOfLoaned = data.checkIfPlayerHasLoaned(playerUUID);
+        if (nameOfLoaned != null) {
+            boolean success = data.loanListLoaner(player);
+            if (!success) {
+                player.sendMessage(Component.text("Error getting your loan info.").color(NamedTextColor.RED));
+            }
+            return;
+        }
+
+        player.sendMessage(Component.text("You don't have any active loans.").color(NamedTextColor.YELLOW));
+    }
+
     public void clearLoanRequests() {
         requestTimeout.clear();
         loanRequests.clear();
