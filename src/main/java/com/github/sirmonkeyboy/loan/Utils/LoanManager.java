@@ -36,11 +36,11 @@ public class LoanManager {
         this.cooldownManager = cooldownManager;
     }
 
-    public boolean loanRequest(Player player, String[] args) {
+    public void loanRequest(Player player, String[] args) {
 
         if (args.length < 4) {
             player.sendMessage(Component.text("Usage /loan create (user your loaning to) (loan Amount) (pay back Amount)").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
 
@@ -57,12 +57,12 @@ public class LoanManager {
                 long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
                 String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
                 player.sendMessage(CooldownMessage);
-                return true;
+                return;
             }
 
             if (target == null || !target.isOnline()) {
                 player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
-                return true;
+                return;
             }
 
             UUID targetUUID = target.getUniqueId();
@@ -70,7 +70,7 @@ public class LoanManager {
 
             if (targetUUID.equals(playerUUID)) {
                 player.sendMessage(Component.text("You cannot loan to yourself.").color(NamedTextColor.RED));
-                return true;
+                return;
             }
 
             String nameOfLoaner = data.checkIfHaveLoan(targetUUID);
@@ -80,24 +80,24 @@ public class LoanManager {
 
             if (requestTimeout.containsKey(targetUUID)) {
                 player.sendMessage(targetName + " already has a loan request wait seconds for it to timeout.");
-                return true;
+                return;
             }
 
             Economy eco = Loan.getEconomy();
 
             if (loanAmount > eco.getBalance(player)) {
                 player.sendMessage(Component.text("You don't have $" + loanAmount + " in your balance.").color(NamedTextColor.RED));
-                return true;
+                return;
             }
 
             if (!(loanAmount > configManager.getMinimumLoanSize())) {
                 player.sendMessage(Component.text("Minimum loan size is $100000.").color(NamedTextColor.RED));
-                return true;
+                return;
             }
 
             if (!(loanAmount <= payBackAmount)) {
                 player.sendMessage(Component.text("Pay back amount must be equal to or larger then the loan amount.").color(NamedTextColor.RED));
-                return true;
+                return;
             }
 
             loanRequests.put(targetUUID, new LoanData(playerUUID, loanAmount, payBackAmount));
@@ -121,18 +121,17 @@ public class LoanManager {
             target.sendMessage(Component.text("Type /loan accept " + playerName + " to accept request will timeout in " + configManager.getRequestTimeout() +" seconds."));
 
             cooldownManager.startCooldown(playerUUID);
-            return true;
         } catch (NumberFormatException | SQLException e) {
             player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
             throw new RuntimeException(e);
         }
     }
 
-    public boolean loanAccept(Player player, String[] args) throws SQLException {
+    public void loanAccept(Player player, String[] args) throws SQLException {
 
         if (args.length < 2) {
             player.sendMessage(Component.text("Usage /loan accept (User loaning you money)").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
         Player target  = Bukkit.getPlayer(args[1]);
@@ -144,13 +143,13 @@ public class LoanManager {
         String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
         if (nameOfLoaner != null) {
             player.sendMessage(Component.text( "You already has a loan from " + nameOfLoaner).color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
 
         if (target == null || !target.isOnline()) {
             player.sendMessage(Component.text("Player not found or is offline.").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
         UUID targetUUID = target.getUniqueId();
@@ -159,7 +158,7 @@ public class LoanManager {
         LoanData loanData = loanRequests.get(playerUUID);
         if (loanData == null) {
             player.sendMessage(Component.text("You don't have any loan requests.").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
         UUID requesterUUID = loanData.getRequesterUUID();
@@ -168,21 +167,21 @@ public class LoanManager {
 
         if (!requesterUUID.equals(targetUUID)) {
             player.sendMessage(Component.text("No loan request from that player").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
         Economy eco = Loan.getEconomy();
 
         if (loanAmount > eco.getBalance(target)) {
             player.sendMessage(Component.text(targetName + " doesn't have $" + loanAmount + " in their balance.").color(NamedTextColor.RED));
-            return true;
+            return;
         }
 
         boolean success = data.loanAccept(targetUUID, targetName, playerUUID, playerName, loanAmount, payBackAmount);
 
         if (!success) {
             player.sendMessage(Component.text("Error in creating the loan try again or contact staff.").color(NamedTextColor.RED));
-            return true;
+            return;
         }
         eco.withdrawPlayer(target, loanAmount);
         eco.depositPlayer(player, loanAmount);
@@ -191,7 +190,6 @@ public class LoanManager {
 
         requestTimeout.remove(playerUUID);
         cooldownManager.startCooldown(playerUUID);
-        return true;
     }
 
     public void loanPay(Player player, String[] args) throws SQLException {
