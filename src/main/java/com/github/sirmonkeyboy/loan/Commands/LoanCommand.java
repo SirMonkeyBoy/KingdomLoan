@@ -30,7 +30,7 @@ public class LoanCommand implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand (@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args){
+    public boolean onCommand (@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (sender instanceof Player p){
             if (!p.hasPermission("Loan.commands.loan")) {
                 p.sendMessage(Component.text("You Don't have permission to use /loan").color(NamedTextColor.RED));
@@ -73,7 +73,7 @@ public class LoanCommand implements TabExecutor {
                         loanManager.loanAccept(p, args);
                     } catch (SQLException e) {
                         p.sendMessage(Component.text("Error in creating the loan try again or contact staff.").color(NamedTextColor.RED));
-                        throw new RuntimeException(e);
+                        return true;
                     }
                     return true;
 
@@ -82,12 +82,17 @@ public class LoanCommand implements TabExecutor {
                         loanManager.loanPay(p, args);
                     } catch (SQLException e) {
                         p.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
-                        throw new RuntimeException(e);
+                        return true;
                     }
                     return true;
 
                 case "list":
-                    p.sendMessage("test");
+                    try {
+                        loanManager.loanList(p);
+                    } catch (SQLException e) {
+                        p.sendMessage(Component.text("Error in getting loan list try again or contact staff.").color(NamedTextColor.RED));
+                        return true;
+                    }
                     return true;
 
                 case "history":
