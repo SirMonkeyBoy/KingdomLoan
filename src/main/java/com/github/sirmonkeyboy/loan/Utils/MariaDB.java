@@ -418,4 +418,32 @@ public class MariaDB {
             }
         }
     }
+
+    // lists the one active loan
+    public boolean loanListLoaned(Player player) throws SQLException {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner, loanAmount, payBackAmount, amountPaid FROM Loan WHERE uuidOfLoaned = ?")) {
+                pstmt.setString(1, player.getUniqueId().toString());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String nameOfLoaner = rs.getString("nameOfLoaner");
+                        double loanAmount = rs.getDouble("loanAmount");
+                        double payBackAmount = rs.getDouble("payBackAmount");
+                        double amountPaid = rs.getDouble("amountPaid");
+                        double amountLeft = payBackAmount - amountPaid;
+
+                        if (nameOfLoaner == null) {
+                            player.sendMessage(Component.text("You don't"));
+                            return true;
+                        }
+                        player.sendMessage(Component.text("You have a loan from " + nameOfLoaner + " for $" + loanAmount + " you have left to pay $" + amountLeft));
+                    }
+                }
+                return true;
+            } catch (SQLException e) {
+                Utils.getErrorLogger("Error getting players loan: " + e.getMessage());
+                return false;
+            }
+        }
+    }
 }
