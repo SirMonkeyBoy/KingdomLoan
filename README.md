@@ -24,11 +24,14 @@ Command Usage examples:
   - `/loan history borrowed 1` List of loans you have borrowed up to 10 loans per page.
   - `/loan history lent 1` List of loans you have lent up to 10 loans per page.
 
-Feature:
+Features:
 - MariaDB for data storage.
 - Keeps a record of all Loans in the table LoanHistory.
 - Cooldown timer for all commands that use the database configurable in config.yml.
 - Configurable loan minimum in config.yml.
+
+TODO
+- Add /loan history.
 
 Needs a MariaDB Database to work plugin won't start without it.
 
