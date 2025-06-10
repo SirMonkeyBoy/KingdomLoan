@@ -20,7 +20,7 @@ Command Usage examples:
   - `/loan accept Monkey` Accepted loan from Monkey for \$100000 and pay back amount is \$150000 also sends a message to the lender.
   - `/loan pay` If you have an active loan it will tell you how much is left to pay.
   - `/loan pay 10000` Pays down your loan by 10000.
-  - `/loan list` Active loans you have or have given.
+  - `/loan list` Active loans you have or have given out.
   - `/loan history borrowed 1` List of loans you have borrowed up to 10 loans per page.
   - `/loan history lent 1` List of loans you have lent up to 10 loans per page.
 

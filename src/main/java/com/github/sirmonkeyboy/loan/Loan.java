@@ -53,7 +53,7 @@ public final class Loan extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this, loanManager));
+        Objects.requireNonNull(getCommand("Loan")).setExecutor(new LoanCommand(this, configManager, loanManager));
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(data), this);
 

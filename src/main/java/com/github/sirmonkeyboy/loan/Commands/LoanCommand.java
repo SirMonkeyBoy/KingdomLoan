@@ -1,6 +1,7 @@
 package com.github.sirmonkeyboy.loan.Commands;
 
 import com.github.sirmonkeyboy.loan.Loan;
+import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
 import com.github.sirmonkeyboy.loan.Utils.LoanManager;
 
 import net.kyori.adventure.text.Component;
@@ -22,10 +23,13 @@ public class LoanCommand implements TabExecutor {
 
     private final Loan plugin;
 
+    private final ConfigManager configManager;
+
     private final LoanManager loanManager;
 
-    public LoanCommand(Loan plugin, LoanManager loanManager) {
+    public LoanCommand(Loan plugin, ConfigManager configManager, LoanManager loanManager) {
         this.plugin = plugin;
+        this.configManager = configManager;
         this.loanManager = loanManager;
     }
 
@@ -39,11 +43,11 @@ public class LoanCommand implements TabExecutor {
 
             if (args.length == 0) {
                 p.sendMessage(Component.text("Loan usages"));
-                p.sendMessage(Component.text("/loan create (user your loaning to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a loan.").color(NamedTextColor.GOLD)));
-                p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan create (user your lending to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a request loan.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan request from that user " + configManager.getRequestTimeout() + " second request timeout.").color(NamedTextColor.GOLD)));
                 p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
-                p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
-                p.sendMessage(Component.text("/loan history (had/given) (page) - ").append(Component.text("List of all loans have had or list of all loans you have given out.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan list - ").append(Component.text("Active loans you have or have given out.").color(NamedTextColor.GOLD)));
+                p.sendMessage(Component.text("/loan history (borrowed/lent) (page) - ").append(Component.text("List of loans you have borrowed or lent up to 10 loans per page.").color(NamedTextColor.GOLD)));
                 return true;
             }
 
@@ -53,11 +57,11 @@ public class LoanCommand implements TabExecutor {
 
                 case "help":
                     p.sendMessage(Component.text("Loan usages"));
-                    p.sendMessage(Component.text("/loan create (user your loaning to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a loan.").color(NamedTextColor.GOLD)));
-                    p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan from that user 120 second time out.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan create (user your lending to) (loan Amount) (pay back Amount) - ").append(Component.text("Create's a request loan.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan accept (Username) - ").append(Component.text("Accepts the loan request from that user " + configManager.getRequestTimeout() + " second request timeout.").color(NamedTextColor.GOLD)));
                     p.sendMessage(Component.text("/loan pay (Amount) - ").append(Component.text("Pays back your loan.").color(NamedTextColor.GOLD)));
-                    p.sendMessage(Component.text("/loan list - ").append(Component.text("Shows you the active loan have or a list of all active loans you have given out.").color(NamedTextColor.GOLD)));
-                    p.sendMessage(Component.text("/loan history (had/given) (page) - ").append(Component.text("List of all loans have had or list of all loans you have given out.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan list - ").append(Component.text("Active loans you have or have given out.").color(NamedTextColor.GOLD)));
+                    p.sendMessage(Component.text("/loan history (borrowed/lent) (page) - ").append(Component.text("List of loans you have borrowed or lent up to 10 loans per page.").color(NamedTextColor.GOLD)));
                     return true;
 
                 case "create":

@@ -433,10 +433,10 @@ public class MariaDB {
                         double amountLeft = payBackAmount - amountPaid;
 
                         if (nameOfLender == null) {
-                            player.sendMessage(Component.text("You don't"));
+                            player.sendMessage(Component.text("You don't have a loan.").color(NamedTextColor.YELLOW));
                             return true;
                         }
-                        player.sendMessage(Component.text("You have a loan from " + nameOfLender + " for $" + loanAmount + " you have left to pay $" + amountLeft));
+                        player.sendMessage(Component.text("You have a loan from " + nameOfLender + " for $" + loanAmount + " you have left to pay $" + amountLeft).color(NamedTextColor.GREEN));
                     }
                 }
                 return true;
@@ -466,7 +466,7 @@ public class MariaDB {
             try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_borrower, loan_amount, pay_back_amount, amount_paid FROM active_loans WHERE uuid_of_lender = ?")) {
                 pstmt.setString(1, player.getUniqueId().toString());
                 try (ResultSet rs = pstmt.executeQuery()) {
-                    player.sendMessage(Component.text("List of active loans you have lent out"));
+                    player.sendMessage(Component.text("List of active loans you have lent out").color(NamedTextColor.GOLD));
                     while (rs.next()) {
                         String nameOfBorrower = rs.getString("name_of_borrower");
                         double loanAmount = rs.getDouble("loan_amount");
