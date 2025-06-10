@@ -139,6 +139,12 @@ public class LoanManager {
         UUID playerUUID = player.getUniqueId();
         String playerName = player.getName();
 
+        if (cooldownManager.isOnCooldown(playerUUID)) {
+            long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
+            String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
+            player.sendMessage(CooldownMessage);
+            return;
+        }
 
         String nameOfLender = data.checkIfHasALoan(playerUUID);
         if (nameOfLender != null) {
@@ -188,6 +194,7 @@ public class LoanManager {
         player.sendMessage(Component.text("Accepted loan from " + targetName + " for $" + loanAmount + " and pay back amount $" + payBackAmount).color(NamedTextColor.GREEN));
         target.sendMessage(Component.text(playerName + " accepted your loan for $" + loanAmount + " and pay back amount $" + payBackAmount).color(NamedTextColor.GREEN));
 
+        loanRequests.remove(playerUUID);
         requestTimeout.remove(playerUUID);
         cooldownManager.startCooldown(playerUUID);
     }
@@ -196,6 +203,13 @@ public class LoanManager {
         UUID playerUUID = player.getUniqueId();
 
         if (args.length == 1) {
+
+            if (cooldownManager.isOnCooldown(playerUUID)) {
+                long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
+                String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
+                player.sendMessage(CooldownMessage);
+                return;
+            }
 
             String nameOfLender = data.checkIfHasALoan(playerUUID);
             if (nameOfLender == null) {
@@ -244,6 +258,7 @@ public class LoanManager {
 
             player.sendMessage(Component.text("Paid down loan by $" + payAmount).color(NamedTextColor.GREEN));
 
+            cooldownManager.startCooldown(playerUUID);
         } catch (NumberFormatException e) {
             player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
             throw new RuntimeException(e);
@@ -252,12 +267,21 @@ public class LoanManager {
 
     public void loanList(Player player) throws SQLException {
         UUID playerUUID = player.getUniqueId();
+
+        if (cooldownManager.isOnCooldown(playerUUID)) {
+            long seconds = cooldownManager.getRemainingTime(playerUUID) / 1000;
+            String CooldownMessage = configManager.getCooldownMessage().replace("%Seconds%", String.valueOf(seconds));
+            player.sendMessage(CooldownMessage);
+            return;
+        }
+
         String nameOfLender = data.checkIfHasALoan(playerUUID);
         if (nameOfLender != null) {
             boolean success = data.loanListBorrowed(player);
             if (!success) {
                 player.sendMessage(Component.text("Error getting your loan info try again or contact staff.").color(NamedTextColor.RED));
             }
+            cooldownManager.startCooldown(playerUUID);
             return;
         }
 
@@ -267,10 +291,12 @@ public class LoanManager {
             if (!success) {
                 player.sendMessage(Component.text("Error getting your loan info try again or contact staff.").color(NamedTextColor.RED));
             }
+            cooldownManager.startCooldown(playerUUID);
             return;
         }
 
         player.sendMessage(Component.text("You don't have any active loans.").color(NamedTextColor.YELLOW));
+        cooldownManager.startCooldown(playerUUID);
     }
 
     public void clearLoanRequests() {
