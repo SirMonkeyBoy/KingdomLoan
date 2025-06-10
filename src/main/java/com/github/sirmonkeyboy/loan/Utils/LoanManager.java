@@ -36,7 +36,7 @@ public class LoanManager {
         this.cooldownManager = cooldownManager;
     }
 
-    public void loanRequest(Player player, String[] args) {
+    public void loanCreate(Player player, String[] args) {
 
         if (args.length < 4) {
             player.sendMessage(Component.text("Usage /loan create (user your loaning to) (loan Amount) (pay back Amount)").color(NamedTextColor.RED));
@@ -73,9 +73,9 @@ public class LoanManager {
                 return;
             }
 
-            String nameOfLoaner = data.checkIfHaveLoan(targetUUID);
-            if (nameOfLoaner != null) {
-                player.sendMessage(Component.text(targetName + " already has a loan from " + nameOfLoaner));
+            String nameOfLender = data.checkIfHasALoan(targetUUID);
+            if (nameOfLender != null) {
+                player.sendMessage(Component.text(targetName + " already has a loan from " + nameOfLender));
             }
 
             if (requestTimeout.containsKey(targetUUID)) {
@@ -140,9 +140,9 @@ public class LoanManager {
         String playerName = player.getName();
 
 
-        String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
-        if (nameOfLoaner != null) {
-            player.sendMessage(Component.text( "You already has a loan from " + nameOfLoaner).color(NamedTextColor.RED));
+        String nameOfLender = data.checkIfHasALoan(playerUUID);
+        if (nameOfLender != null) {
+            player.sendMessage(Component.text( "You already has a loan from " + nameOfLender).color(NamedTextColor.RED));
             return;
         }
 
@@ -197,8 +197,8 @@ public class LoanManager {
 
         if (args.length == 1) {
 
-            String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
-            if (nameOfLoaner == null) {
+            String nameOfLender = data.checkIfHasALoan(playerUUID);
+            if (nameOfLender == null) {
                 player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.RED));
                 return;
             }
@@ -220,8 +220,8 @@ public class LoanManager {
         try {
             double payAmount = Double.parseDouble(args[1]);
 
-            String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
-            if (nameOfLoaner == null) {
+            String nameOfLender = data.checkIfHasALoan(playerUUID);
+            if (nameOfLender == null) {
                 player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.RED));
                 return;
             }
@@ -252,18 +252,18 @@ public class LoanManager {
 
     public void loanList(Player player) throws SQLException {
         UUID playerUUID = player.getUniqueId();
-        String nameOfLoaner = data.checkIfHaveLoan(playerUUID);
-        if (nameOfLoaner != null) {
-            boolean success = data.loanListLoaned(player);
+        String nameOfLender = data.checkIfHasALoan(playerUUID);
+        if (nameOfLender != null) {
+            boolean success = data.loanListBorrowed(player);
             if (!success) {
                 player.sendMessage(Component.text("Error getting your loan info.").color(NamedTextColor.RED));
             }
             return;
         }
 
-        String nameOfLoaned = data.checkIfPlayerHasLoaned(playerUUID);
-        if (nameOfLoaned != null) {
-            boolean success = data.loanListLoaner(player);
+        String nameOfBorrower = data.checkIfPlayerHasLent(playerUUID);
+        if (nameOfBorrower != null) {
+            boolean success = data.loanListLent(player);
             if (!success) {
                 player.sendMessage(Component.text("Error getting your loan info.").color(NamedTextColor.RED));
             }

@@ -65,7 +65,7 @@ public class LoanCommand implements TabExecutor {
                         p.sendMessage(Component.text("You Don't have permission to use /loan create").color(NamedTextColor.RED));
                         return true;
                     }
-                    loanManager.loanRequest(p, args);
+                    loanManager.loanCreate(p, args);
                     return true;
 
                 case "accept":

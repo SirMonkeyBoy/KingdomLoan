@@ -64,39 +64,39 @@ public class MariaDB {
             conn.setAutoCommit(true);
 
                 PreparedStatement pstmt = conn.prepareStatement("""
-                        CREATE TABLE IF NOT EXISTS Loan (
-                        loanId BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
-                        uuidOfLoaner VARCHAR(255),
-                        nameOfLoaner VARCHAR(255),
-                        uuidOfLoaned VARCHAR(255),
-                        nameOfLoaned VARCHAR(255),
-                        loanAmount DOUBLE,
-                        payBackAmount DOUBLE,
-                        amountPaid DOUBLE DEFAULT 0,
-                        amountPaidOut DOUBLE DEFAULT 0,
-                        PRIMARY KEY(loanId)
+                        CREATE TABLE IF NOT EXISTS active_loans (
+                        loan_id BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
+                        uuid_of_lender VARCHAR(255),
+                        name_of_lender VARCHAR(255),
+                        uuid_of_borrower VARCHAR(255),
+                        name_of_borrower VARCHAR(255),
+                        loan_amount DOUBLE,
+                        pay_back_amount DOUBLE,
+                        amount_paid DOUBLE DEFAULT 0,
+                        amount_paid_out DOUBLE DEFAULT 0,
+                        PRIMARY KEY(loan_id)
                         )""");
                 pstmt.executeUpdate();
 
-                PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS Loan_index_0 ON Loan (uuidOfLoaner, uuidOfLoaned);");
+                PreparedStatement pstmt2 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS active_loans_index ON active_loans (uuid_of_lender, uuid_of_borrower);");
                 pstmt2.executeUpdate();
 
             PreparedStatement pstmt3 = conn.prepareStatement("""
-                        CREATE TABLE IF NOT EXISTS LoanHistory (
-                        loanHistoryId BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
-                        uuidOfLoaner VARCHAR(255),
-                        nameOfLoaner VARCHAR(255),
-                        uuidOfLoaned VARCHAR(255),
-                        nameOfLoaned VARCHAR(255),
-                        loanAmount DOUBLE,
-                        payBackAmount DOUBLE,
-                        loanStartDate TIMESTAMP,
-                        loanEndDate TIMESTAMP,
-                        PRIMARY KEY(loanHistoryId)
+                        CREATE TABLE IF NOT EXISTS loan_history (
+                        loan_history_id BIGINT NOT NULL AUTO_INCREMENT UNIQUE,
+                        uuid_of_lender VARCHAR(255),
+                        name_of_lender VARCHAR(255),
+                        uuid_of_borrower VARCHAR(255),
+                        name_of_borrower VARCHAR(255),
+                        loan_amount DOUBLE,
+                        pay_back_amount DOUBLE,
+                        loan_start_date TIMESTAMP,
+                        loan_end_date TIMESTAMP,
+                        PRIMARY KEY(loan_history_id)
                         )""");
             pstmt3.executeUpdate();
 
-            PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS LoanHistory_index_0 ON LoanHistory (uuidOfLoaner, uuidOfLoaned);");
+            PreparedStatement pstmt4 = conn.prepareStatement("CREATE INDEX IF NOT EXISTS loan_history_index_0 ON loan_history (uuid_of_lender, uuid_of_borrower);");
             pstmt4.executeUpdate();
         }
     }
@@ -109,47 +109,47 @@ public class MariaDB {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
-            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner, nameOfLoaned, uuidOfLoaner, uuidOfLoaned FROM Loan WHERE uuidOfLoaner = ? or uuidOfLoaned = ?")) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_lender, name_of_borrower, uuid_of_lender, uuid_of_borrower FROM active_loans WHERE uuid_of_lender = ? or uuid_of_borrower = ?")) {
                 pstmt.setString(1, uuidStr);
                 pstmt.setString(2, uuidStr);
 
                 try (ResultSet rs = pstmt.executeQuery()) {
 
-                    boolean updateLoanerName = false;
-                    boolean updateLoanedName = false;
+                    boolean updateLenderName = false;
+                    boolean updateBorrowerName = false;
 
                     while (rs.next()) {
-                        if (uuidStr.equals(rs.getString("uuidOfLoaner")) && !name.equals(rs.getString("nameOfLoaner"))) {
-                            updateLoanerName = true;
+                        if (uuidStr.equals(rs.getString("uuid_of_lender")) && !name.equals(rs.getString("name_of_lender"))) {
+                            updateLenderName = true;
                         }
 
-                        if (uuidStr.equals(rs.getString("uuidOfLoaned")) && !name.equals(rs.getString("nameOfLoaned"))) {
-                            updateLoanedName = true;
+                        if (uuidStr.equals(rs.getString("uuid_of_borrower")) && !name.equals(rs.getString("name_of_borrower"))) {
+                            updateBorrowerName = true;
                         }
                     }
 
-                    if (updateLoanerName) {
-                        try (PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Loan SET nameOfLoaner = ? WHERE uuidOfLoaner = ?")) {
+                    if (updateLenderName) {
+                        try (PreparedStatement pstmt2 = conn.prepareStatement("UPDATE active_loans SET name_of_lender = ? WHERE uuid_of_lender = ?")) {
                             pstmt2.setString(1, name);
                             pstmt2.setString(2, uuidStr);
                             pstmt2.executeUpdate();
                         }
 
-                        try (PreparedStatement pstmt3 = conn.prepareStatement("UPDATE LoanHistory SET nameOfLoaner = ? WHERE uuidOfLoaner = ?")) {
+                        try (PreparedStatement pstmt3 = conn.prepareStatement("UPDATE loan_history SET name_of_lender = ? WHERE uuid_of_lender = ?")) {
                             pstmt3.setString(1, name);
                             pstmt3.setString(2, uuidStr);
                             pstmt3.executeUpdate();
                         }
                     }
 
-                    if (updateLoanedName) {
-                        try (PreparedStatement pstmt4 = conn.prepareStatement("UPDATE Loan SET nameOfLoaned = ? WHERE uuidOfLoaned = ?")) {
+                    if (updateBorrowerName) {
+                        try (PreparedStatement pstmt4 = conn.prepareStatement("UPDATE active_loans SET name_of_borrower = ? WHERE uuid_of_borrower = ?")) {
                             pstmt4.setString(1, name);
                             pstmt4.setString(2, uuidStr);
                             pstmt4.executeUpdate();
                         }
 
-                        try (PreparedStatement pstmt5 = conn.prepareStatement("UPDATE LoanHistory SET nameOfLoaned = ? WHERE uuidOfLoaned = ?")) {
+                        try (PreparedStatement pstmt5 = conn.prepareStatement("UPDATE loan_history SET name_of_borrower = ? WHERE uuid_of_borrower = ?")) {
                             pstmt5.setString(1, name);
                             pstmt5.setString(2, uuidStr);
                             pstmt5.executeUpdate();
@@ -173,49 +173,49 @@ public class MariaDB {
         }
     }
 
-    public String checkIfHaveLoan(UUID uuid) throws SQLException {
+    public String checkIfHasALoan(UUID uuid) throws SQLException {
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner FROM Loan WHERE uuidOfLoaned = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_lender FROM active_loans WHERE uuid_of_borrower = ?")) {
 
             pstmt.setString(1, uuid.toString());
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getString("nameOfLoaner");
+                    return rs.getString("name_of_lender");
                 }
             }
         }
         return null;
     }
 
-    public boolean loanAccept(UUID uuidOfLoaner, String nameOfLoaner, UUID uuidOfLoaned, String nameOfLoaned, double loanAmount, double payBackAmount) throws SQLException {
+    public boolean loanAccept(UUID uuid_of_lender, String name_of_lender, UUID uuid_of_borrower, String name_of_borrower, double loan_amount, double pay_back_amount) throws SQLException {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
             try {
-                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO Loan " +
-                        "(uuidOfLoaner, nameOfLoaner, uuidOfLoaned, nameOfLoaned, loanAmount, payBackAmount)" +
+                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO active_loans " +
+                        "(uuid_of_lender, name_of_lender, uuid_of_borrower, name_of_borrower, loan_amount, pay_back_amount)" +
                         " VALUES (?, ?, ?, ?, ?, ?)")) {
-                    pstmt.setString(1, uuidOfLoaner.toString());
-                    pstmt.setString(2, nameOfLoaner);
-                    pstmt.setString(3, uuidOfLoaned.toString());
-                    pstmt.setString(4, nameOfLoaned);
-                    pstmt.setDouble(5, loanAmount);
-                    pstmt.setDouble(6, payBackAmount);
+                    pstmt.setString(1, uuid_of_lender.toString());
+                    pstmt.setString(2, name_of_lender);
+                    pstmt.setString(3, uuid_of_borrower.toString());
+                    pstmt.setString(4, name_of_borrower);
+                    pstmt.setDouble(5, loan_amount);
+                    pstmt.setDouble(6, pay_back_amount);
                     pstmt.executeUpdate();
                 }
 
-                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO LoanHistory " +
-                        "(uuidOfLoaner, nameOfLoaner, uuidOfLoaned, nameOfLoaned, loanAmount, payBackAmount, loanStartDate)" +
+                try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO loan_history " +
+                        "(uuid_of_lender, name_of_lender, uuid_of_borrower, name_of_borrower, loan_amount, pay_back_amount, loan_start_date)" +
                         " VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                     long currentTimeMillis = System.currentTimeMillis();
                     Timestamp timestamp = new Timestamp(currentTimeMillis);
-                    pstmt.setString(1, uuidOfLoaner.toString());
-                    pstmt.setString(2, nameOfLoaner);
-                    pstmt.setString(3, uuidOfLoaned.toString());
-                    pstmt.setString(4, nameOfLoaned);
-                    pstmt.setDouble(5, loanAmount);
-                    pstmt.setDouble(6, payBackAmount);
+                    pstmt.setString(1, uuid_of_lender.toString());
+                    pstmt.setString(2, name_of_lender);
+                    pstmt.setString(3, uuid_of_borrower.toString());
+                    pstmt.setString(4, name_of_borrower);
+                    pstmt.setDouble(5, loan_amount);
+                    pstmt.setDouble(6, pay_back_amount);
                     pstmt.setTimestamp(7, timestamp);
                     pstmt.executeUpdate();
                 }
@@ -237,19 +237,19 @@ public class MariaDB {
         }
     }
 
-    public double getAmountLeftOnLoan(UUID uuidOfLoaned) throws SQLException {
+    public double getAmountLeftOnLoan(UUID uuid_of_borrower) throws SQLException {
         try (Connection conn = getConnection()) {
             double currentAmountPaid;
             double payBackAmount;
             double stillNeedToPayBack;
 
             try (PreparedStatement pstmt = conn.prepareStatement(
-                    "SELECT amountPaid, payBackAmount FROM Loan WHERE uuidOfLoaned = ?")) {
-                pstmt.setString(1, uuidOfLoaned.toString());
+                    "SELECT amount_paid, pay_back_amount FROM active_loans WHERE uuid_of_borrower = ?")) {
+                pstmt.setString(1, uuid_of_borrower.toString());
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        currentAmountPaid = rs.getDouble("amountPaid");
-                        payBackAmount = rs.getDouble("payBackAmount");
+                        currentAmountPaid = rs.getDouble("amount_paid");
+                        payBackAmount = rs.getDouble("pay_back_amount");
                          return stillNeedToPayBack = payBackAmount - currentAmountPaid;
                     }
                 }
@@ -258,7 +258,7 @@ public class MariaDB {
         return 0;
     }
 
-    public boolean loanPay(Player player, UUID uuidOfLoaned, double payAmount) throws SQLException {
+    public boolean loanPay(Player player, UUID uuid_of_borrower, double payAmount) throws SQLException {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
@@ -268,12 +268,12 @@ public class MariaDB {
                 double stillNeedToPayBack;
 
                 try (PreparedStatement pstmt = conn.prepareStatement(
-                        "SELECT amountPaid, payBackAmount FROM Loan WHERE uuidOfLoaned = ?")) {
-                    pstmt.setString(1, uuidOfLoaned.toString());
+                        "SELECT amount_paid, pay_back_amount FROM active_loans WHERE uuid_of_borrower = ?")) {
+                    pstmt.setString(1, uuid_of_borrower.toString());
                     try (ResultSet rs = pstmt.executeQuery()) {
                         if (rs.next()) {
-                            currentAmountPaid = rs.getDouble("amountPaid");
-                            payBackAmount = rs.getDouble("payBackAmount");
+                            currentAmountPaid = rs.getDouble("amount_paid");
+                            payBackAmount = rs.getDouble("pay_back_amount");
                             stillNeedToPayBack = payBackAmount - currentAmountPaid;
                         } else {
                             player.sendMessage(Component.text("You don't have a loan.").color(NamedTextColor.RED));
@@ -289,27 +289,27 @@ public class MariaDB {
 
                 if (Math.abs(payAmount - stillNeedToPayBack) < 0.01) {
                     try (PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE Loan SET uuidOfLoaned = null, amountPaid = amountPaid + ? WHERE uuidOfLoaned = ?")) {
+                            "UPDATE active_loans SET uuid_of_borrower = null, amount_paid = amount_paid + ? WHERE uuid_of_borrower = ?")) {
                         pstmt.setDouble(1, payAmount);
-                        pstmt.setString(2, uuidOfLoaned.toString());
+                        pstmt.setString(2, uuid_of_borrower.toString());
 
                         pstmt.executeUpdate();
                     }
 
                     try (PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE LoanHistory " +
-                                    "SET loanEndDate = ? " +
-                                    "WHERE loanHistoryId = (" +
-                                    "   SELECT loanHistoryId FROM (" +
-                                    "       SELECT loanHistoryId FROM LoanHistory " +
-                                    "       WHERE uuidOfLoaned = ? AND loanEndDate IS NULL " +
-                                    "       ORDER BY loanStartDate DESC LIMIT 1" +
+                            "UPDATE loan_history " +
+                                    "SET loan_end_date = ? " +
+                                    "WHERE loan_history_id = (" +
+                                    "   SELECT loan_history_id FROM (" +
+                                    "       SELECT loan_history_id FROM loan_history " +
+                                    "       WHERE uuid_of_borrower = ? AND loan_end_date IS NULL " +
+                                    "       ORDER BY loan_start_date DESC LIMIT 1" +
                                     "   ) AS sub" +
                                     ")")) {
                         long currentTimeMillis = System.currentTimeMillis();
                         Timestamp timestamp = new Timestamp(currentTimeMillis);
                         pstmt.setTimestamp(1, timestamp);
-                        pstmt.setString(2, uuidOfLoaned.toString());
+                        pstmt.setString(2, uuid_of_borrower.toString());
 
                         pstmt.executeUpdate();
                     }
@@ -321,9 +321,9 @@ public class MariaDB {
                 }
 
                 try (PreparedStatement pstmt = conn.prepareStatement(
-                        "UPDATE Loan SET amountPaid = amountPaid + ? WHERE uuidOfLoaned = ?")) {
+                        "UPDATE active_loans SET amount_paid = amount_paid + ? WHERE uuid_of_borrower = ?")) {
                     pstmt.setDouble(1, payAmount);
-                    pstmt.setString(2, uuidOfLoaned.toString());
+                    pstmt.setString(2, uuid_of_borrower.toString());
 
                     pstmt.executeUpdate();
                 }
@@ -357,41 +357,41 @@ public class MariaDB {
 
                 Economy eco = Loan.getEconomy();
 
-                try ( PreparedStatement batchUpdate = conn.prepareStatement("UPDATE Loan SET amountPaidOut = ? WHERE loanID = ?");
+                try ( PreparedStatement batchUpdate = conn.prepareStatement("UPDATE active_loans SET amount_paid_out = ? WHERE loan_id = ?");
                       PreparedStatement pstmt = conn.prepareStatement(
-                        "SELECT loanId, nameOfLoaned, payBackAmount, amountPaid, amountPaidOut FROM Loan WHERE uuidOfLoaner = ?")) {
+                        "SELECT loan_id, name_of_borrower, pay_back_amount, amount_paid, amount_paid_out FROM active_loans WHERE uuid_of_lender = ?")) {
                     pstmt.setString(1, String.valueOf(player.getUniqueId()));
                     try (ResultSet rs = pstmt.executeQuery()) {
                         while (rs.next()) {
-                            long loanId = rs.getLong("loanId");
-                            String nameOfLoaned = rs.getString("nameOfLoaned");
-                            double payBackAmount = rs.getDouble("payBackAmount");
-                            double amountPaid = rs.getDouble("amountPaid");
-                            double amountPaidOut = rs.getDouble("amountPaidOut");
+                            long loan_id = rs.getLong("loan_id");
+                            String nameOfBorrower = rs.getString("name_of_borrower");
+                            double payBackAmount = rs.getDouble("pay_back_amount");
+                            double amountPaid = rs.getDouble("amount_paid");
+                            double amountPaidOut = rs.getDouble("amount_paid_out");
 
                             double amountToPayOut = amountPaid - amountPaidOut;
 
                             if (amountToPayOut > 0 && player.isOnline()) {
                                 eco.depositPlayer(player, amountToPayOut);
-                                namesOfLoaned.add(nameOfLoaned);
+                                namesOfLoaned.add(nameOfBorrower);
                                 totalPaidOut += amountToPayOut;
 
                                 if (payBackAmount == amountPaidOut + amountToPayOut) {
                                     try (PreparedStatement pstmt2 = conn.prepareStatement(
-                                            "DELETE FROM Loan WHERE loanId = ?")) {
-                                        pstmt2.setLong(1, loanId);
+                                            "DELETE FROM active_loans WHERE loan_id = ?")) {
+                                        pstmt2.setLong(1, loan_id);
                                         pstmt2.executeUpdate();
 
-                                        player.sendMessage(Component.text(nameOfLoaned + " successfully paid off there loan.").color(NamedTextColor.GREEN));
+                                        player.sendMessage(Component.text(nameOfBorrower + " successfully paid off there loan.").color(NamedTextColor.GREEN));
                                     }
                                 } else {
                                     batchUpdate.setDouble(1, amountPaid);
-                                    batchUpdate.setLong(2, loanId);
+                                    batchUpdate.setLong(2, loan_id);
                                     batchUpdate.addBatch();
                                 }
                             }
                             else if (amountToPayOut < 0) {
-                                Utils.getErrorLogger("Loan [" + loanId + "] has invalid state: amountPaid");
+                                Utils.getErrorLogger("Loan [" + loan_id + "] has invalid state: amount_paid");
                                 return;
                             }
                         }
@@ -420,23 +420,23 @@ public class MariaDB {
     }
 
     // lists the one active loan
-    public boolean loanListLoaned(Player player) throws SQLException {
+    public boolean loanListBorrowed(Player player) throws SQLException {
         try (Connection conn = getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaner, loanAmount, payBackAmount, amountPaid FROM Loan WHERE uuidOfLoaned = ?")) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_lender, loan_amount, pay_back_amount, amount_paid FROM active_loans WHERE uuid_of_borrower = ?")) {
                 pstmt.setString(1, player.getUniqueId().toString());
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        String nameOfLoaner = rs.getString("nameOfLoaner");
-                        double loanAmount = rs.getDouble("loanAmount");
-                        double payBackAmount = rs.getDouble("payBackAmount");
-                        double amountPaid = rs.getDouble("amountPaid");
+                        String nameOfLender = rs.getString("name_of_lender");
+                        double loanAmount = rs.getDouble("loan_amount");
+                        double payBackAmount = rs.getDouble("pay_back_amount");
+                        double amountPaid = rs.getDouble("amount_paid");
                         double amountLeft = payBackAmount - amountPaid;
 
-                        if (nameOfLoaner == null) {
+                        if (nameOfLender == null) {
                             player.sendMessage(Component.text("You don't"));
                             return true;
                         }
-                        player.sendMessage(Component.text("You have a loan from " + nameOfLoaner + " for $" + loanAmount + " you have left to pay $" + amountLeft));
+                        player.sendMessage(Component.text("You have a loan from " + nameOfLender + " for $" + loanAmount + " you have left to pay $" + amountLeft));
                     }
                 }
                 return true;
@@ -447,13 +447,13 @@ public class MariaDB {
         }
     }
 
-    public String checkIfPlayerHasLoaned(UUID uuid) throws SQLException {
+    public String checkIfPlayerHasLent(UUID uuid) throws SQLException {
         try (Connection conn = getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaned FROM Loan WHERE uuidOfLoaner = ?")) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_borrower FROM active_loans WHERE uuid_of_lender = ?")) {
                 pstmt.setString(1, uuid.toString());
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getString("nameOfLoaned");
+                        return rs.getString("name_of_borrower");
                     }
                 }
             }
@@ -461,20 +461,20 @@ public class MariaDB {
         return null;
     }
 
-    public boolean loanListLoaner(Player player) throws SQLException {
+    public boolean loanListLent(Player player) throws SQLException {
         try (Connection conn = getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement("SELECT nameOfLoaned, loanAmount, payBackAmount, amountPaid FROM Loan WHERE uuidOfLoaner = ?")) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_borrower, loan_amount, pay_back_amount, amount_paid FROM active_loans WHERE uuid_of_lender = ?")) {
                 pstmt.setString(1, player.getUniqueId().toString());
                 try (ResultSet rs = pstmt.executeQuery()) {
                     player.sendMessage(Component.text("List of active loans you have lent out"));
                     while (rs.next()) {
-                        String nameOfLoaned = rs.getString("nameOfLoaned");
-                        double loanAmount = rs.getDouble("loanAmount");
-                        double payBackAmount = rs.getDouble("payBackAmount");
-                        double amountPaid = rs.getDouble("amountPaid");
+                        String nameOfBorrower = rs.getString("name_of_borrower");
+                        double loanAmount = rs.getDouble("loan_amount");
+                        double payBackAmount = rs.getDouble("pay_back_amount");
+                        double amountPaid = rs.getDouble("amount_paid");
                         double amountLeft = payBackAmount - amountPaid;
 
-                        player.sendMessage(Component.text("You have lent " + nameOfLoaned + " $" + loanAmount + " they still have to pay back $" + amountLeft));
+                        player.sendMessage(Component.text("You have lent " + nameOfBorrower + " $" + loanAmount + " they still have to pay back $" + amountLeft));
                     }
                 }
             }
