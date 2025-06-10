@@ -1,6 +1,6 @@
-package com.github.sirmonkeyboy.loan.Listeners;
+package com.github.sirmonkeyboy.kingdomloan.Listeners;
 
-import com.github.sirmonkeyboy.loan.Utils.MariaDB;
+import com.github.sirmonkeyboy.kingdomloan.Utils.MariaDB;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

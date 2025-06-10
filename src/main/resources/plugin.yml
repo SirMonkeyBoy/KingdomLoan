@@ -1,12 +1,12 @@
-name: Loan
+name: KingdomLoan
 version: '${project.version}'
-main: com.github.sirmonkeyboy.loan.Loan
+main: com.github.sirmonkeyboy.kingdomloan.KingdomLoan
 api-version: '1.21'
-prefix: Loan
+prefix: KingdomLoan
 depend: [Vault]
 authors: [SirMonkeyBoy]
-description: Loan Plugin for minecraft
-website: https://github.com/SirMonkeyBoy
+description: Kingdom Loan a Plugin for PaperMC
+website: https://github.com/SirMonkeyBoy/KingdomLoan
 commands:
   Loan:
     description: Loan command

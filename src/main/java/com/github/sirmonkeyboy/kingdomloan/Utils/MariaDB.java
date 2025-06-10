@@ -1,6 +1,6 @@
-package com.github.sirmonkeyboy.loan.Utils;
+package com.github.sirmonkeyboy.kingdomloan.Utils;
 
-import com.github.sirmonkeyboy.loan.Loan;
+import com.github.sirmonkeyboy.kingdomloan.KingdomLoan;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -355,7 +355,7 @@ public class MariaDB {
 
             try {
 
-                Economy eco = Loan.getEconomy();
+                Economy eco = KingdomLoan.getEconomy();
 
                 try ( PreparedStatement batchUpdate = conn.prepareStatement("UPDATE active_loans SET amount_paid_out = ? WHERE loan_id = ?");
                       PreparedStatement pstmt = conn.prepareStatement(

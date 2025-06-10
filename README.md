@@ -1,4 +1,4 @@
-# Loan Plugin for Minecraft
+# Kingdom Loan
 
 Commands:
 - `/loan`: Displays a list of subcommands.

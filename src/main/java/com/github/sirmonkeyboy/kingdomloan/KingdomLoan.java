@@ -1,8 +1,8 @@
-package com.github.sirmonkeyboy.loan;
+package com.github.sirmonkeyboy.kingdomloan;
 
-import com.github.sirmonkeyboy.loan.Commands.LoanCommand;
-import com.github.sirmonkeyboy.loan.Listeners.PlayerJoinListener;
-import com.github.sirmonkeyboy.loan.Utils.*;
+import com.github.sirmonkeyboy.kingdomloan.Commands.LoanCommand;
+import com.github.sirmonkeyboy.kingdomloan.Listeners.PlayerJoinListener;
+import com.github.sirmonkeyboy.kingdomloan.Utils.*;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public final class Loan extends JavaPlugin {
+public final class KingdomLoan extends JavaPlugin {
 
     private MariaDB data;
 
@@ -57,7 +57,7 @@ public final class Loan extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(data), this);
 
-        getLogger().info("Loan has started");
+        getLogger().info("Kingdom Loan has started");
     }
 
     private boolean setupEconomy() {
@@ -88,6 +88,6 @@ public final class Loan extends JavaPlugin {
             getLogger().info("Disconnected successfully from Database");
         }
 
-        getLogger().info("Loan has stopped");
+        getLogger().info("kingdom Loan has stopped");
     }
 }

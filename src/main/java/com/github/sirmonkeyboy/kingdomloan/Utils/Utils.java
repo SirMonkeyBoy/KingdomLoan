@@ -1,4 +1,4 @@
-package com.github.sirmonkeyboy.loan.Utils;
+package com.github.sirmonkeyboy.kingdomloan.Utils;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -12,7 +12,7 @@ public class Utils {
 
     public static void getErrorLogger(String message) {
         console.sendMessage(Component.text("[").color(NamedTextColor.WHITE)
-                .append(Component.text("Loan").color(NamedTextColor.GOLD)
+                .append(Component.text("KingdomLoan").color(NamedTextColor.GOLD)
                         .append(Component.text("] ").color(NamedTextColor.WHITE))
                         .append(Component.text(message).color(NamedTextColor.DARK_RED))));
     }

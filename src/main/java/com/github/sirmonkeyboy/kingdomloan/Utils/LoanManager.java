@@ -1,6 +1,6 @@
-package com.github.sirmonkeyboy.loan.Utils;
+package com.github.sirmonkeyboy.kingdomloan.Utils;
 
-import com.github.sirmonkeyboy.loan.Loan;
+import com.github.sirmonkeyboy.kingdomloan.KingdomLoan;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class LoanManager {
 
-    private final Loan plugin;
+    private final KingdomLoan plugin;
 
     private final ConfigManager configManager;
 
@@ -29,7 +29,7 @@ public class LoanManager {
 
     private final HashMap<UUID, BukkitTask> requestTimeout = new HashMap<>();
 
-    public LoanManager(Loan plugin, ConfigManager configManager, MariaDB data, CooldownManager cooldownManager) {
+    public LoanManager(KingdomLoan plugin, ConfigManager configManager, MariaDB data, CooldownManager cooldownManager) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.data = data;
@@ -83,7 +83,7 @@ public class LoanManager {
                 return;
             }
 
-            Economy eco = Loan.getEconomy();
+            Economy eco = KingdomLoan.getEconomy();
 
             if (loanAmount > eco.getBalance(player)) {
                 player.sendMessage(Component.text("You don't have $" + loanAmount + " in your balance.").color(NamedTextColor.RED));
@@ -176,7 +176,7 @@ public class LoanManager {
             return;
         }
 
-        Economy eco = Loan.getEconomy();
+        Economy eco = KingdomLoan.getEconomy();
 
         if (loanAmount > eco.getBalance(target)) {
             player.sendMessage(Component.text(targetName + " doesn't have $" + loanAmount + " in their balance.").color(NamedTextColor.RED));
@@ -240,7 +240,7 @@ public class LoanManager {
                 return;
             }
 
-            Economy eco = Loan.getEconomy();
+            Economy eco = KingdomLoan.getEconomy();
 
             if (payAmount > eco.getBalance(player)) {
                 player.sendMessage(Component.text("You don't have $" + payAmount + " in your balance.").color(NamedTextColor.RED));

@@ -1,6 +1,6 @@
-package com.github.sirmonkeyboy.loan.Utils;
+package com.github.sirmonkeyboy.kingdomloan.Utils;
 
-import com.github.sirmonkeyboy.loan.Loan;
+import com.github.sirmonkeyboy.kingdomloan.KingdomLoan;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ConfigManager {
 
-    private final Loan plugin;
+    private final KingdomLoan plugin;
 
     private String host;
     private String port;
@@ -27,7 +27,7 @@ public class ConfigManager {
     private String cooldownMessage;
     private String invalidAmountMessage;
 
-    public ConfigManager(Loan plugin) {
+    public ConfigManager(KingdomLoan plugin) {
         this.plugin = plugin;
         load();
     }

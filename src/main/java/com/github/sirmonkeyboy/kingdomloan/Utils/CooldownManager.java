@@ -1,4 +1,4 @@
-package com.github.sirmonkeyboy.loan.Utils;
+package com.github.sirmonkeyboy.kingdomloan.Utils;
 
 import java.util.HashMap;
 import java.util.UUID;

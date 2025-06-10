@@ -1,8 +1,8 @@
-package com.github.sirmonkeyboy.loan.Commands;
+package com.github.sirmonkeyboy.kingdomloan.Commands;
 
-import com.github.sirmonkeyboy.loan.Loan;
-import com.github.sirmonkeyboy.loan.Utils.ConfigManager;
-import com.github.sirmonkeyboy.loan.Utils.LoanManager;
+import com.github.sirmonkeyboy.kingdomloan.KingdomLoan;
+import com.github.sirmonkeyboy.kingdomloan.Utils.ConfigManager;
+import com.github.sirmonkeyboy.kingdomloan.Utils.LoanManager;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,13 +21,13 @@ import java.util.List;
 
 public class LoanCommand implements TabExecutor {
 
-    private final Loan plugin;
+    private final KingdomLoan plugin;
 
     private final ConfigManager configManager;
 
     private final LoanManager loanManager;
 
-    public LoanCommand(Loan plugin, ConfigManager configManager, LoanManager loanManager) {
+    public LoanCommand(KingdomLoan plugin, ConfigManager configManager, LoanManager loanManager) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.loanManager = loanManager;
