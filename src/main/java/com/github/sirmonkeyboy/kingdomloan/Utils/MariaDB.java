@@ -13,9 +13,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class MariaDB {
 
@@ -277,17 +275,16 @@ public class MariaDB {
                             stillNeedToPayBack = payBackAmount - currentAmountPaid;
                         } else {
                             player.sendMessage(Component.text("You don't have a loan.").color(NamedTextColor.RED));
-                            return false;
+                            return true;
                         }
                     }
                 }
 
                 if (payAmount > stillNeedToPayBack) {
                     player.sendMessage(Component.text("You are trying to pay more then you owe you only owe $" + stillNeedToPayBack).color(NamedTextColor.RED));
-                    return false;
+                    return true;
                 }
 
-                if (Math.abs(payAmount - stillNeedToPayBack) < 0.01) {
                     try (PreparedStatement pstmt = conn.prepareStatement(
                             "UPDATE active_loans SET uuid_of_borrower = null, amount_paid = amount_paid + ? WHERE uuid_of_borrower = ?")) {
                         pstmt.setDouble(1, payAmount);
@@ -333,12 +330,16 @@ public class MariaDB {
             } catch (SQLException e) {
                 try {
                     conn.rollback();
-                    return false;
+                    player.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
+                    Utils.getErrorLogger(e.getMessage());
+
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
                     Utils.getErrorLogger("Error paying down " + player.getName() + " loan:" + rollbackEx.getMessage());
+                    player.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
                     throw rollbackEx;
                 }
+                return false;
             } finally {
                 conn.setAutoCommit(true);
             }
@@ -482,6 +483,30 @@ public class MariaDB {
         } catch (SQLException e) {
             Utils.getErrorLogger("Error getting loan list lent for " + player.getName() + ":" + e.getMessage());
             return false;
+        }
+    }
+
+    public List<LoanHistoryData> loanHistoryBorrowed(Player player, int page) throws SQLException {
+        List<LoanHistoryData> loanHistory = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_lender, loan_amount, loan_start_date, loan_end_date FROM loan_history WHERE uuid_of_borrower = ? ORDER BY loan_start_date DESC LIMIT 10 OFFSET ?")) {
+
+                pstmt.setString(1, player.getUniqueId().toString());
+                pstmt.setInt(2, Math.max(0, (page - 1) * 10));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String nameOfLender = rs.getString("name_of_lender");
+                        double loanAmount = rs.getDouble("loan_amount");
+                        Timestamp loanStartDate = rs.getTimestamp("loan_start_date");
+                        Timestamp loanEndDate = rs.getTimestamp("loan_end_date");
+                        loanHistory.add(new LoanHistoryData(player.getUniqueId(), nameOfLender, loanAmount, loanStartDate, loanEndDate));
+                    }
+                }
+                return loanHistory;
+            } catch (SQLException e) {
+                Utils.getErrorLogger("Error getting " + player.getName() + " loan history borrowed: " + e.getMessage());
+                return loanHistory;
+            }
         }
     }
 }
