@@ -100,7 +100,12 @@ public class LoanCommand implements TabExecutor {
                     return true;
 
                 case "history":
-                    player.sendMessage("test");
+                    try {
+                        loanManager.loanHistory(player, args);
+                    } catch (SQLException e) {
+                        player.sendMessage(Component.text("Error in getting loan list try again or contact staff.").color(NamedTextColor.RED));
+                        return true;
+                    }
                     return true;
             }
         }
