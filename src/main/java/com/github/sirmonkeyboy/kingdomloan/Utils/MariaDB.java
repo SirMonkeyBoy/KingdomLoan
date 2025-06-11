@@ -101,10 +101,10 @@ public class MariaDB {
         }
     }
 
-    public void updatePlayerName(Player p) throws SQLException {
-        UUID uuid = p.getUniqueId();
+    public void updatePlayerName(Player player) throws SQLException {
+        UUID uuid = player.getUniqueId();
         String uuidStr = String.valueOf(uuid);
-        String name = p.getName();
+        String name = player.getName();
 
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
@@ -163,7 +163,7 @@ public class MariaDB {
                     conn.rollback();
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
-                    Utils.getErrorLogger("Error updating player name in Loan database tables: " + rollbackEx.getMessage());
+                    Utils.getErrorLogger("Error updating " + player.getName() + " name in Loan database tables: " + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
                 throw e;
@@ -228,7 +228,7 @@ public class MariaDB {
                     return false;
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
-                    Utils.getErrorLogger("Error creating loan: " + rollbackEx.getMessage());
+                    Utils.getErrorLogger("Error creating " + name_of_borrower + " loan:" + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
             } finally {
@@ -336,7 +336,7 @@ public class MariaDB {
                     return false;
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
-                    Utils.getErrorLogger("Error paying down loan: " + rollbackEx.getMessage());
+                    Utils.getErrorLogger("Error paying down " + player.getName() + " loan:" + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
             } finally {
@@ -410,7 +410,7 @@ public class MariaDB {
                     conn.rollback();
                 } catch (SQLException rollbackEx) {
                     rollbackEx.addSuppressed(e);
-                    Utils.getErrorLogger("Error paying loaner: " + rollbackEx.getMessage());
+                    Utils.getErrorLogger("Error paying " + player.getName() + ": " + rollbackEx.getMessage());
                     throw rollbackEx;
                 }
             } finally {
@@ -441,7 +441,7 @@ public class MariaDB {
                 }
                 return true;
             } catch (SQLException e) {
-                Utils.getErrorLogger("Error getting players loan: " + e.getMessage());
+                Utils.getErrorLogger("Error getting loan list borrowed for " + player.getName() + ": " + e.getMessage());
                 return false;
             }
         }
@@ -461,7 +461,7 @@ public class MariaDB {
         return null;
     }
 
-    public boolean loanListLent(Player player) throws SQLException {
+    public boolean loanListLent(Player player) {
         try (Connection conn = getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_borrower, loan_amount, pay_back_amount, amount_paid FROM active_loans WHERE uuid_of_lender = ?")) {
                 pstmt.setString(1, player.getUniqueId().toString());
@@ -480,7 +480,7 @@ public class MariaDB {
             }
             return true;
         } catch (SQLException e) {
-            Utils.getErrorLogger("Error getting players loan: " + e.getMessage());
+            Utils.getErrorLogger("Error getting loan list lent for " + player.getName() + ":" + e.getMessage());
             return false;
         }
     }
