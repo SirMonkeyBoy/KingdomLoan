@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class LoanManager {
@@ -228,6 +229,8 @@ public class LoanManager {
                 return;
             }
 
+            player.sendMessage(Component.text( "Error getting amount left").color(NamedTextColor.RED));
+
             return;
         }
 
@@ -256,7 +259,6 @@ public class LoanManager {
             boolean success = data.loanPay(player, playerUUID, payAmount);
 
             if (!success) {
-                player.sendMessage(Component.text("Error in paying down the loan try again or contact staff.").color(NamedTextColor.RED));
                 return;
             }
 
@@ -267,7 +269,6 @@ public class LoanManager {
             cooldownManager.startCooldown(playerUUID);
         } catch (NumberFormatException e) {
             player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
-            throw new RuntimeException(e);
         }
     }
 
@@ -303,6 +304,117 @@ public class LoanManager {
 
         player.sendMessage(Component.text("You don't have any active loans.").color(NamedTextColor.YELLOW));
         cooldownManager.startCooldown(playerUUID);
+    }
+
+    public void loanHistory(Player player, String[] args) throws SQLException {
+        if (args.length < 2) {
+            player.sendMessage(Component.text("Usage /loan history borrowed/lent (page)").color(NamedTextColor.RED));
+            return;
+        }
+
+        String input = args[1].toLowerCase();
+
+        int page = 1;
+
+        if (args.length == 2) {
+            switch (input) {
+                case "lent":
+                    try {
+                        List<LoanHistoryData> loanHistory = data.loanHistoryLent(player, page);
+                        player.sendMessage(Component.text(" -----").color(NamedTextColor.YELLOW)
+                                .append(Component.text(" Loan History Lent ").color(NamedTextColor.GOLD))
+                                .append(Component.text("-----").color(NamedTextColor.YELLOW)));
+                        for (LoanHistoryData entry : loanHistory) {
+                            player.sendMessage(Component.text("Lent " + entry.getNameOfLenderOrBorrower() + " $" + entry.getLoanAmount()));
+                        }
+                        if (loanHistory.isEmpty()) {
+                            player.sendMessage(Component.text("No loans on this page you haven't lent this much.").color(NamedTextColor.YELLOW));
+                            return;
+                        }
+                        if (loanHistory.size() < 10){
+                            player.sendMessage("Last page");
+                            return;
+                        }
+                        player.sendMessage(Component.text("Next page is " + page+1));
+                        return;
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
+                    }
+
+                case "borrowed":
+                    try {
+                        List<LoanHistoryData> loanHistory = data.loanHistoryBorrowed(player, page);
+                        player.sendMessage(Component.text(" -----").color(NamedTextColor.YELLOW)
+                                .append(Component.text(" Loan History Borrowed ").color(NamedTextColor.GOLD))
+                                .append(Component.text("-----").color(NamedTextColor.YELLOW)));
+                        for (LoanHistoryData entry : loanHistory) {
+                            player.sendMessage(Component.text("Loan from " + entry.getNameOfLenderOrBorrower() + " for $" + entry.getLoanAmount()));
+                        }
+                        if (loanHistory.isEmpty()) {
+                            player.sendMessage(Component.text("No loans on this page you haven't borrowed this much.").color(NamedTextColor.YELLOW));
+                            return;
+                        }
+                        if (loanHistory.size() < 10){
+                            player.sendMessage("Last page.");
+                            return;
+                        }
+
+                        player.sendMessage(Component.text("Next page is " + page+1));
+                        return;
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
+                    }
+            }
+        }
+        page = Integer.parseInt(args[2]);
+
+        switch (input) {
+            case "lent":
+                try {
+                    List<LoanHistoryData> loanHistory = data.loanHistoryLent(player, page);
+                    player.sendMessage(Component.text(" -----").color(NamedTextColor.YELLOW)
+                            .append(Component.text(" Loan History Lent ").color(NamedTextColor.GOLD))
+                            .append(Component.text("-----").color(NamedTextColor.YELLOW)));
+                    for (LoanHistoryData entry : loanHistory) {
+                        player.sendMessage(Component.text("Lent " + entry.getNameOfLenderOrBorrower() + " $" + entry.getLoanAmount()));
+                    }
+                    if (loanHistory.isEmpty()) {
+                        player.sendMessage(Component.text("No loans on this page you haven't lent this much.").color(NamedTextColor.YELLOW));
+                        return;
+                    }
+                    if (loanHistory.size() < 10){
+                        player.sendMessage("Last page");
+                        return;
+                    }
+                    player.sendMessage(Component.text("Next page is " + page+1));
+                    return;
+                } catch (NumberFormatException e) {
+                    player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
+                }
+
+            case "borrowed":
+                try {
+                    List<LoanHistoryData> loanHistory = data.loanHistoryBorrowed(player, page);
+                    player.sendMessage(Component.text(" -----").color(NamedTextColor.YELLOW)
+                            .append(Component.text(" Loan History Borrowed ").color(NamedTextColor.GOLD))
+                            .append(Component.text("-----").color(NamedTextColor.YELLOW)));
+                    for (LoanHistoryData entry : loanHistory) {
+                        player.sendMessage(Component.text("Loan from " + entry.getNameOfLenderOrBorrower() + " for $" + entry.getLoanAmount()));
+                    }
+                    if (loanHistory.isEmpty()) {
+                        player.sendMessage(Component.text("No loans on this page you haven't borrowed this much.").color(NamedTextColor.YELLOW));
+                        return;
+                    }
+                    if (loanHistory.size() < 10){
+                        player.sendMessage("Last page.");
+                        return;
+                    }
+                    player.sendMessage(Component.text("Next page is " + page+1));
+                    return;
+                } catch (NumberFormatException e) {
+                    player.sendMessage(Component.text(configManager.getInvalidAmountMessage()).color(NamedTextColor.RED));
+                }
+        }
     }
 
     public void clearLoanRequests() {
