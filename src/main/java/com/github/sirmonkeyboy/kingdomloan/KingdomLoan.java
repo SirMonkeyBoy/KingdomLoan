@@ -88,6 +88,6 @@ public final class KingdomLoan extends JavaPlugin {
             getLogger().info("Disconnected successfully from Database");
         }
 
-        getLogger().info("kingdom Loan has stopped");
+        getLogger().info("Kingdom Loan has stopped");
     }
 }

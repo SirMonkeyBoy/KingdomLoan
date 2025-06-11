@@ -76,6 +76,8 @@ public class LoanManager {
             String nameOfLender = data.checkIfHasALoan(targetUUID);
             if (nameOfLender != null) {
                 player.sendMessage(Component.text(targetName + " already has a loan from " + nameOfLender).color(NamedTextColor.RED));
+                cooldownManager.startCooldown(playerUUID);
+                return;
             }
 
             if (requestTimeout.containsKey(targetUUID)) {
@@ -149,6 +151,7 @@ public class LoanManager {
         String nameOfLender = data.checkIfHasALoan(playerUUID);
         if (nameOfLender != null) {
             player.sendMessage(Component.text( "You already has a loan from " + nameOfLender).color(NamedTextColor.RED));
+            cooldownManager.startCooldown(playerUUID);
             return;
         }
 
@@ -214,12 +217,14 @@ public class LoanManager {
             String nameOfLender = data.checkIfHasALoan(playerUUID);
             if (nameOfLender == null) {
                 player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.YELLOW));
+                cooldownManager.startCooldown(playerUUID);
                 return;
             }
 
             double amountLeftOnLoan = data.getAmountLeftOnLoan(player.getUniqueId());
             if (amountLeftOnLoan != 0) {
                 player.sendMessage(Component.text( "You have $" + amountLeftOnLoan + " on your loan.").color(NamedTextColor.GREEN));
+                cooldownManager.startCooldown(playerUUID);
                 return;
             }
 
@@ -237,6 +242,7 @@ public class LoanManager {
             String nameOfLender = data.checkIfHasALoan(playerUUID);
             if (nameOfLender == null) {
                 player.sendMessage(Component.text( "You don't have a loan.").color(NamedTextColor.YELLOW));
+                cooldownManager.startCooldown(playerUUID);
                 return;
             }
 
