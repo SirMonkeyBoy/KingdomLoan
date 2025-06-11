@@ -285,6 +285,7 @@ public class MariaDB {
                     return true;
                 }
 
+                if (payAmount == stillNeedToPayBack) {
                     try (PreparedStatement pstmt = conn.prepareStatement(
                             "UPDATE active_loans SET uuid_of_borrower = null, amount_paid = amount_paid + ? WHERE uuid_of_borrower = ?")) {
                         pstmt.setDouble(1, payAmount);
@@ -505,6 +506,30 @@ public class MariaDB {
                 return loanHistory;
             } catch (SQLException e) {
                 Utils.getErrorLogger("Error getting " + player.getName() + " loan history borrowed: " + e.getMessage());
+                return loanHistory;
+            }
+        }
+    }
+
+    public List<LoanHistoryData> loanHistoryLent(Player player, int page) throws SQLException {
+        List<LoanHistoryData> loanHistory = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement("SELECT name_of_borrower, loan_amount, loan_start_date, loan_end_date FROM loan_history WHERE uuid_of_lender = ? ORDER BY loan_start_date DESC LIMIT 10 OFFSET ?")) {
+
+                pstmt.setString(1, player.getUniqueId().toString());
+                pstmt.setInt(2, Math.max(0, (page - 1) * 10));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String nameOfBorrower = rs.getString("name_of_borrower");
+                        double loanAmount = rs.getDouble("loan_amount");
+                        Timestamp loanStartDate = rs.getTimestamp("loan_start_date");
+                        Timestamp loanEndDate = rs.getTimestamp("loan_end_date");
+                        loanHistory.add(new LoanHistoryData(player.getUniqueId(), nameOfBorrower, loanAmount, loanStartDate, loanEndDate));
+                    }
+                }
+                return loanHistory;
+            } catch (SQLException e) {
+                Utils.getErrorLogger("Error getting " + player.getName() + " loan history lent: " + e.getMessage());
                 return loanHistory;
             }
         }
