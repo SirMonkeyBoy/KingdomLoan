@@ -30,9 +30,6 @@ Features:
 - Cooldown timer for all commands that use the database configurable in config.yml.
 - Configurable loan minimum in config.yml.
 
-TODO
-- Add /loan history.
-
 Needs a MariaDB Database to work plugin won't start without it.
 
 This is all subject to change.
